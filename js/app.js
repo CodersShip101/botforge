@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Check if backend is available (silent)
   checkBackend().then(online => {
     if (!online && isAuthenticated() && !window.location.pathname.includes('login') && !window.location.pathname.includes('register')) {
-      console.log('BotForge: Backend offline, using local storage');
+      console.log('VANTIS AI: Backend offline, using local storage');
     }
   });
 

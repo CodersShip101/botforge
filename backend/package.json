@@ -1,7 +1,7 @@
 {
   "name": "botforge-backend",
   "version": "1.0.0",
-  "description": "BotForge API - Free Trading Bot Builder",
+  "description": "VANTIS AI API - AI-Powered Trading Bot Builder",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: botforge
+    name: vantis-ai
     env: node
     buildCommand: npm install
     startCommand: npm start

@@ -44,7 +44,7 @@ if (require.main === module) {
     await db.init();
     await new Promise(resolve => {
       app.listen(PORT, () => {
-        console.log(`BotForge API running on port ${PORT}`);
+        console.log(`VANTIS AI API running on port ${PORT}`);
         resolve();
       });
     });

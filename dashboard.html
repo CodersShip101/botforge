@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Bots - BotForge</title>
+  <title>Dashboard - VANTIS AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <nav class="navbar">
     <div class="container nav-inner">
-      <a href="index.html" class="logo">BotForge</a>
+      <a href="index.html" class="logo">VANTIS AI</a>
       <div class="nav-links">
         <a href="builder.html">Bot Builder</a>
         <a href="dashboard.html">My Bots</a>
@@ -19,13 +22,44 @@
   </nav>
 
   <div class="container">
-    <div class="page-header">
-      <h1>My Bots</h1>
-      <p>Your saved trading bots. Edit, download, or delete them.</p>
-    </div>
+    <div class="dashboard-layout">
+      <aside class="dashboard-sidebar">
+        <div class="sidebar-section">
+          <h3 class="sidebar-heading">Navigation</h3>
+          <nav class="sidebar-nav">
+            <a href="builder.html" class="sidebar-link sidebar-link-action">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+              Create New Bot
+            </a>
+            <a href="dashboard.html" class="sidebar-link active">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              My Bots
+            </a>
+            <a href="docs.html" class="sidebar-link">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Documentation
+            </a>
+          </nav>
+        </div>
+        <div class="sidebar-section">
+          <h3 class="sidebar-heading">Quick Stats</h3>
+          <div id="quick-stats">
+            <div class="stat-item"><span class="stat-item-label">Total Bots</span><span class="stat-item-value" id="stat-total">0</span></div>
+            <div class="stat-item"><span class="stat-item-label">Strategies</span><span class="stat-item-value" id="stat-strategies">-</span></div>
+          </div>
+        </div>
+      </aside>
 
-    <div class="dashboard-grid" id="bots-container">
-      <div class="empty-state"><h3>Loading...</h3></div>
+      <main class="dashboard-main">
+        <div class="page-header">
+          <h1>My Bots</h1>
+          <p>Your saved trading bots. Edit, download, or delete them.</p>
+        </div>
+
+        <div class="dashboard-grid" id="bots-container">
+          <div class="empty-state"><h3>Loading...</h3></div>
+        </div>
+      </main>
     </div>
   </div>
 
@@ -37,10 +71,17 @@
       await renderBots();
     }
 
+    function updateQuickStats(bots) {
+      document.getElementById('stat-total').textContent = bots.length;
+      const strategies = [...new Set(bots.map(b => (b.configuration || {}).strategy || 'N/A').filter(Boolean))];
+      document.getElementById('stat-strategies').textContent = strategies.length || '-';
+    }
+
     async function renderBots() {
       const container = document.getElementById('bots-container');
       try {
         const bots = await getBots();
+        updateQuickStats(bots);
 
         if (!bots || bots.length === 0) {
           container.innerHTML = `
@@ -55,16 +96,17 @@
         container.innerHTML = bots.map(bot => {
           const cfg = bot.configuration || {};
           const created = bot.created_at || bot.createdAt || bot.created;
+          const strat = cfg.strategy || 'N/A';
           return `
             <div class="bot-card">
               <h3>${bot.name}</h3>
-              <span class="bot-strategy">${capitalize(cfg.strategy || 'N/A')}</span>
+              <span class="bot-strategy">${capitalize(strat)}</span>
               <p class="bot-meta">${bot.description || 'No description'}<br>
               Created: ${formatDate(created)}</p>
               <div class="bot-actions">
                 <a href="builder.html?edit=${bot.id}" class="btn btn-outline">Edit</a>
                 <button class="btn btn-primary" onclick="downloadBot('${bot.id}', 'mt4')">.mq4</button>
-                <button class="btn btn-primary" onclick="downloadBot('${bot.id}', 'mt5')">.mq5</button>
+                <button class="btn btn-success" onclick="downloadBot('${bot.id}', 'mt5')">.mq5</button>
                 <button class="btn btn-danger" onclick="deleteBot('${bot.id}')">Delete</button>
               </div>
             </div>`;

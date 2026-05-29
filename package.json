@@ -1,7 +1,7 @@
 {
   "name": "botforge",
   "version": "1.0.0",
-  "description": "Free Trading Bot Builder - MT4 & MT5 Expert Advisor Generator",
+  "description": "VANTIS AI - AI-Powered Trading Bot Builder for MT4 & MT5",
   "scripts": {
     "start": "node backend/server.js",
     "test": "cd backend && node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --detectOpenHandles",
