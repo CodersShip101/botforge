@@ -25,7 +25,7 @@
     <div style="max-width:420px;margin:60px auto">
       <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:8px">Sign In</h1>
       <p style="color:var(--text-muted);margin-bottom:24px">Access your saved trading bots.</p>
-      <div id="alert-area"></div>
+      <div id="alert-area" style="position:relative;min-height:0"></div>
 
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
         <button class="social-btn social-btn-google" onclick="clerkOAuth('oauth_google')" id="btn-google">
@@ -68,31 +68,53 @@
     data-clerk-publishable-key="pk_test_Y2xlcmsuc2hpbmluZy1iaXJkLTQyLmNsZXJrLmFjY291bnRzLmRldiQ"
     src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
     crossorigin="anonymous"
-    onload="initClerk()"
   ></script>
   <script src="js/app.js"></script>
   <script>
     let clerkReady = false;
+    let clerkLoadAttempted = false;
 
-    function initClerk() {
-      window.Clerk.load({ publishableKey: 'pk_test_Y2xlcmsuc2hpbmluZy1iaXJkLTQyLmNsZXJrLmFjY291bnRzLmRldiQ' })
-        .then(() => { clerkReady = true; })
-        .catch(err => console.error('Clerk init error:', err));
+    async function initClerk() {
+      if (clerkLoadAttempted) return;
+      clerkLoadAttempted = true;
+      try {
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
+        await Promise.race([window.Clerk.load(), timeout]);
+        clerkReady = true;
+      } catch (err) {
+        console.error('Clerk init error:', err);
+        const area = document.getElementById('alert-area');
+        area.innerHTML = '<div class="alert alert-error">Clerk failed to initialize. Make sure you have a valid Clerk publishable key configured in the Clerk Dashboard. Social login and email sign-in require Clerk to be properly set up.</div>';
+      }
+    }
+
+    setTimeout(initClerk, 100);
+
+    function setAlert(msg, type) {
+      const area = document.getElementById('alert-area');
+      area.innerHTML = '';
+      const el = document.createElement('div');
+      el.className = 'alert alert-' + type;
+      el.textContent = msg;
+      area.appendChild(el);
     }
 
     async function clerkOAuth(strategy) {
-      if (!clerkReady) { showAlert('Loading, please wait...', 'info', document.getElementById('alert-area')); return; }
+      if (!clerkReady) { return initClerk().then(() => clerkOAuth(strategy)); }
       try {
-        const signIn = await window.Clerk.client.signIn.create({ strategy });
-        window.location.href = signIn.verification.externalRedirect.url;
+        await window.Clerk.client.signIn.authenticateWithRedirect({
+          strategy,
+          redirectUrl: window.location.origin + '/oauth-callback.html',
+          redirectUrlComplete: window.location.origin + '/dashboard.html'
+        });
       } catch (err) {
-        showAlert('Social sign in failed: ' + (err.message || 'Unknown error'), 'error', document.getElementById('alert-area'));
+        setAlert('Social sign in failed: ' + (err.message || 'Unknown error'), 'error');
       }
     }
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!clerkReady) { showAlert('Loading, please wait...', 'info', document.getElementById('alert-area')); return; }
+      if (!clerkReady) { return initClerk().then(() => document.getElementById('login-form').dispatchEvent(new Event('submit'))); }
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const btn = document.getElementById('submit-btn');
@@ -103,13 +125,12 @@
         const signIn = await window.Clerk.client.signIn.create({ identifier: email, password });
         if (signIn.status === 'complete') {
           await window.Clerk.setActive({ session: signIn.createdSessionId });
-          localStorage.setItem('clerk_session', signIn.createdSessionId);
           window.location.href = 'dashboard.html';
         } else {
-          showAlert('Additional verification required.', 'error', document.getElementById('alert-area'));
+          setAlert('Additional verification required.', 'error');
         }
       } catch (err) {
-        showAlert(err.errors?.[0]?.message || err.message || 'Sign in failed', 'error', document.getElementById('alert-area'));
+        setAlert(err.errors?.[0]?.message || err.message || 'Sign in failed', 'error');
       } finally {
         btn.disabled = false;
         btn.textContent = 'Sign In';
