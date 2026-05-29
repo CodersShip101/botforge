@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation - BotForge</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="logo">BotForge</a>
+      <div class="nav-links">
+        <a href="builder.html">Bot Builder</a>
+        <a href="dashboard.html">My Bots</a>
+        <a href="docs.html">Docs</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>Documentation</h1>
+      <p>How to create, download, and install your trading bots.</p>
+    </div>
+
+    <div class="docs-content">
+
+      <h2>What is BotForge?</h2>
+      <p>BotForge is a free online tool that lets you create custom MetaTrader Expert Advisors (EAs) without any coding. Configure your strategy through a simple form, and we generate the MQL4 (.mq4) or MQL5 (.mq5) code for you. No subscriptions, no limits.</p>
+
+      <h2>How to Create a Bot</h2>
+      <ol>
+        <li>Go to the <a href="builder.html">Bot Builder</a> page.</li>
+        <li>Give your bot a name (and optional description).</li>
+        <li>Choose a strategy: Grid, Martingale, Hedging, Trend Following, or Scalping.</li>
+        <li>Configure money management (risk per trade, lot size, daily limits).</li>
+        <li>Set trade management (stop loss, take profit, trailing stop).</li>
+        <li>Define entry rules (buy/sell signals, trend filter, timeframe).</li>
+        <li>Choose MT4 (.mq4) or MT5 (.mq5) format.</li>
+        <li>Click <strong>Save &amp; Download</strong>.</li>
+      </ol>
+
+      <h2>Supported Strategies</h2>
+
+      <h3>Grid Trading</h3>
+      <p>Places buy and sell orders at predefined price intervals. Ideal for range-bound markets. Configure grid size, number of levels, and step distance.</p>
+
+      <h3>Martingale</h3>
+      <p>An aggressive recovery strategy that doubles the lot size after each losing trade. Configure the multiplier factor. Higher risk, higher potential recovery.</p>
+
+      <h3>Hedging</h3>
+      <p>Opens opposing positions to offset risk. Automatically places a hedge trade when a position moves against you. Useful for volatile markets.</p>
+
+      <h3>Trend Following</h3>
+      <p>Trades in the direction of the trend using Moving Average crossovers. Enters on trend confirmation and exits on reversal signals.</p>
+
+      <h3>Scalping</h3>
+      <p>Opens multiple small trades for quick profits using RSI-based entry signals. Designed for M5 timeframe with tight stop losses.</p>
+
+      <h2>How to Install on MetaTrader 4</h2>
+      <ol>
+        <li>Open MetaTrader 4.</li>
+        <li>Click <strong>File</strong> &gt; <strong>Open Data Folder</strong>.</li>
+        <li>Navigate to <code>MQL4</code> &gt; <code>Experts</code>.</li>
+        <li>Copy the downloaded <code>.mq4</code> file into the <code>Experts</code> folder.</li>
+        <li>Restart MetaTrader 4 or right-click in Navigator and select <strong>Refresh</strong>.</li>
+        <li>Drag your EA from <strong>Navigator</strong> &gt; <strong>Expert Advisors</strong> onto a chart.</li>
+        <li>Enable <strong>Automated Trading</strong> (AutoTrading button) and adjust input parameters as needed.</li>
+      </ol>
+
+      <h2>How to Install on MetaTrader 5</h2>
+      <ol>
+        <li>Open MetaTrader 5.</li>
+        <li>Click <strong>File</strong> &gt; <strong>Open Data Folder</strong>.</li>
+        <li>Navigate to <code>MQL5</code> &gt; <code>Experts</code>.</li>
+        <li>Copy the downloaded <code>.mq5</code> file into the <code>Experts</code> folder.</li>
+        <li>Restart MetaTrader 5 or right-click in Navigator and select <strong>Refresh</strong>.</li>
+        <li>Drag your EA from <strong>Navigator</strong> &gt; <strong>Expert Advisors</strong> onto a chart.</li>
+        <li>Enable <strong>Automated Trading</strong> and configure input parameters.</li>
+      </ol>
+
+      <h2>Compiling Generated Code</h2>
+      <p>The downloaded <code>.mq4</code> / <code>.mq5</code> files are source code. MetaTrader needs to compile them into <code>.ex4</code> / <code>.ex5</code> before they can run. Here's how:</p>
+      <ol>
+        <li>After copying the file into the <code>Experts</code> folder, open MetaTrader.</li>
+        <li>Press <strong>F4</strong> to open MetaEditor.</li>
+        <li>In MetaEditor, open the file from <strong>File</strong> &gt; <strong>Open</strong>.</li>
+        <li>Click <strong>Compile</strong> (or press F7).</li>
+        <li>If successful, a compiled <code>.ex4</code> / <code>.ex5</code> file will appear in the <code>Experts</code> folder.</li>
+        <li>If there are compilation errors, check the error log and adjust the inputs.</li>
+      </ol>
+
+      <h2>Important Notes</h2>
+      <ul>
+        <li>BotForge is a <strong>technical tool</strong> — it generates trading code. It is not a broker and does not handle funds.</li>
+        <li>Always test generated EAs on a <strong>demo account</strong> before using real money.</li>
+        <li>Trading involves risk. Past performance does not guarantee future results.</li>
+        <li>Generated code is provided as-is. Customize input parameters in MetaTrader after attaching to a chart.</li>
+        <li>Your bots are saved in your browser's local storage. Clearing your browser data will delete them.</li>
+      </ul>
+
+      <h2>FAQ</h2>
+
+      <h3>Is this really free?</h3>
+      <p>Yes. No subscriptions, no hidden fees. Create unlimited bots.</p>
+
+      <h3>Can I edit a saved bot?</h3>
+      <p>Yes. Go to <a href="dashboard.html">My Bots</a> and click <strong>Edit</strong> on any bot.</p>
+
+      <h3>Where are my bots stored?</h3>
+      <p>In your browser's localStorage. They're only accessible from this browser/device. We recommend downloading the code files for safekeeping.</p>
+
+      <h3>Do I need coding skills?</h3>
+      <p>No. The builder generates all the code for you.</p>
+
+      <h3>Which MetaTrader versions are supported?</h3>
+      <p>Both MT4 (MQL4) and MT5 (MQL5) are supported. Choose your platform before downloading.</p>
+
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

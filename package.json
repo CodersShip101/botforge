@@ -1,0 +1,14 @@
+{
+  "name": "botforge",
+  "version": "1.0.0",
+  "description": "Free Trading Bot Builder - MT4 & MT5 Expert Advisor Generator",
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "start:backend": "cd backend && npm start",
+    "test:backend": "cd backend && npm test",
+    "migrate": "cd backend && node config/migrate.js",
+    "setup": "npm run install:backend && npm run migrate",
+    "start": "npm run start:backend",
+    "test": "npm run test:backend"
+  }
+}
