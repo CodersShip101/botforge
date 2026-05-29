@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - VANTIS AI</title>
+  <title>Create Account - VANTIS AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -23,42 +23,126 @@
 
   <div class="container">
     <div style="max-width:420px;margin:60px auto">
-      <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:8px">Create Account</h1>
-      <p style="color:var(--text-muted);margin-bottom:24px">Free. No coding. No subscription. Start building AI trading bots.</p>
-      <div id="alert-area"></div>
-      <form id="register-form">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" name="username" required placeholder="Choose a username">
+      <div id="step-signup">
+        <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:8px">Create Account</h1>
+        <p style="color:var(--text-muted);margin-bottom:24px">Free. No coding. Start building AI trading bots.</p>
+        <div id="alert-area"></div>
+        <form id="register-form">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required placeholder="Choose a username">
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required placeholder="you@example.com">
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required minlength="6" placeholder="At least 6 characters">
+            <div id="password-strength" style="margin-top:6px;height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+              <div id="strength-bar" style="height:100%;width:0;border-radius:2px;transition:all 0.3s"></div>
+            </div>
+            <p id="strength-text" style="font-size:0.75rem;color:var(--text-muted);margin-top:4px"></p>
+          </div>
+          <button type="submit" class="btn btn-primary btn-md" style="width:100%">Create Account</button>
+        </form>
+        <p style="margin-top:16px;text-align:center;color:var(--text-muted);font-size:0.9rem">
+          Already have an account? <a href="login.html">Sign In</a>
+        </p>
+      </div>
+
+      <div id="step-verify" style="display:none">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;text-align:center">
+          <h2 style="margin-bottom:12px">Check Your Email</h2>
+          <p style="color:var(--text-muted);margin-bottom:20px;line-height:1.6">
+            We sent a verification link to <strong id="verify-email-display" style="color:var(--text)"></strong>.<br>
+            Click the link to activate your account.
+          </p>
+          <div id="verify-providers" style="display:flex;gap:12px;justify-content:center;margin-bottom:20px"></div>
+          <p style="color:var(--text-muted);font-size:0.85rem">
+            Didn't get the email? <a href="#" id="resend-verify-link">Resend</a>
+          </p>
+          <p style="margin-top:16px;font-size:0.85rem">
+            <a href="login.html">Go to Sign In</a>
+          </p>
         </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" required placeholder="you@example.com">
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" required minlength="6" placeholder="At least 6 characters">
-        </div>
-        <button type="submit" class="btn btn-primary btn-md" style="width:100%">Create Account</button>
-      </form>
-      <p style="margin-top:16px;text-align:center;color:var(--text-muted);font-size:0.9rem">
-        Already have an account? <a href="login.html">Sign In</a>
-      </p>
+      </div>
     </div>
   </div>
 
   <script src="js/app.js"></script>
   <script>
+    function checkStrength(password) {
+      let score = 0;
+      if (password.length >= 6) score += 20;
+      if (password.length >= 10) score += 20;
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 20;
+      if (/[0-9]/.test(password)) score += 20;
+      if (/[^a-zA-Z0-9]/.test(password)) score += 20;
+      return score;
+    }
+
+    document.getElementById('password').addEventListener('input', function() {
+      const score = checkStrength(this.value);
+      const bar = document.getElementById('strength-bar');
+      const text = document.getElementById('strength-text');
+      bar.style.width = score + '%';
+      if (score < 40) {
+        bar.style.background = 'var(--red)';
+        text.textContent = 'Weak';
+        text.style.color = 'var(--red)';
+      } else if (score < 80) {
+        bar.style.background = '#FFA500';
+        text.textContent = 'Medium';
+        text.style.color = '#FFA500';
+      } else {
+        bar.style.background = 'var(--green)';
+        text.textContent = 'Strong';
+        text.style.color = 'var(--green)';
+      }
+    });
+
+    let lastSignupEmail = '';
+
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = document.getElementById('username').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+      const btn = e.target.querySelector('button');
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+
       try {
-        const res = await fetchAPI('/auth/register', 'POST', { email, username, password });
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
-        window.location.href = 'dashboard.html';
+        const res = await signup(email, username, password);
+        lastSignupEmail = email;
+        document.getElementById('verify-email-display').textContent = email;
+
+        const providers = document.getElementById('verify-providers');
+        const icons = {
+          Gmail: '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.691 2.28 24 3.434 24 5.457z"/></svg>',
+          Outlook: '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#0078D4" d="M24 7.48v11.675c0 .622-.505 1.128-1.128 1.128H12.5v-9.187l3-2.25L24 7.48zM12.5 20.283H1.128C.505 20.283 0 19.778 0 19.155V7.48l9 6.75 3.5-2.625 3 2.25v9.428zM4.5 3.25L12.5 0l7.5 3.25v3.5L12.5 10 4.5 6.75V3.25z"/></svg>',
+          Yahoo: '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#6001D2" d="M10.5 2.25L6.75 9.75l5.25 9.75H9l-3.75-7.5L1.5 19.5H0l5.25-9.75L0 2.25h3.75L7.5 9.75 11.25 2.25H10.5zm6 0L12.75 9.75 18 19.5h-3.75l-5.25-9.75 5.25-9.75h2.25zm3.75 3a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5z"/></svg>'
+        };
+        providers.innerHTML = (res.providers || [{name:'Gmail',url:'https://mail.google.com'},{name:'Outlook',url:'https://outlook.live.com'},{name:'Yahoo',url:'https://mail.yahoo.com'}])
+          .map(p => `<a href="${p.url}" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text);font-size:0.85rem;font-weight:600;text-decoration:none;transition:all 0.2s">${icons[p.name]||''} ${p.name}</a>`).join('');
+
+        document.getElementById('step-signup').style.display = 'none';
+        document.getElementById('step-verify').style.display = 'block';
+      } catch (err) {
+        showAlert(err.message, 'error', document.getElementById('alert-area'));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    });
+
+    document.getElementById('resend-verify-link').addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (!lastSignupEmail) return;
+      try {
+        await resendVerification(lastSignupEmail);
+        showAlert('Verification email resent!', 'success', document.getElementById('alert-area'));
       } catch (err) {
         showAlert(err.message, 'error', document.getElementById('alert-area'));
       }

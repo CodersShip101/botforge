@@ -31,9 +31,12 @@ describe('Auth API', () => {
       .post('/api/auth/register')
       .send({ email: 'test-user@test.com', username: 'testuser', password: 'password123' });
     expect(res.status).toBe(201);
-    expect(res.body.token).toBeDefined();
+    expect(res.body.access_token).toBeDefined();
     expect(res.body.user.email).toBe('test-user@test.com');
-    testToken = res.body.token;
+    testToken = res.body.access_token;
+    // Mark user as verified for subsequent tests
+    const user = db.prepare('SELECT id FROM users WHERE email = ?').get('test-user@test.com');
+    if (user) db.prepare('UPDATE users SET is_verified = 1 WHERE id = ?').run(user.id);
   });
 
   test('POST /api/auth/register - rejects duplicate', async () => {
@@ -55,8 +58,8 @@ describe('Auth API', () => {
       .post('/api/auth/login')
       .send({ email: 'test-user@test.com', password: 'password123' });
     expect(res.status).toBe(200);
-    expect(res.body.token).toBeDefined();
-    testToken = res.body.token;
+    expect(res.body.access_token).toBeDefined();
+    testToken = res.body.access_token;
   });
 
   test('POST /api/auth/login - rejects bad password', async () => {

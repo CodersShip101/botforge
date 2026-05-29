@@ -52,15 +52,39 @@
       e.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+      const btn = e.target.querySelector('button');
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
       try {
-        const res = await fetchAPI('/auth/login', 'POST', { email, password });
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
+        await signin(email, password);
         window.location.href = 'dashboard.html';
+      } catch (err) {
+        if (err.message.toLowerCase().includes('verify')) {
+          document.getElementById('alert-area').innerHTML = `
+            <div class="alert alert-info">
+              Email not verified.
+              <a href="#" onclick="resendVerify('${email}');return false" style="color:var(--accent)">Resend verification</a>
+            </div>`;
+        } else if (err.message.toLowerCase().includes('locked')) {
+          document.getElementById('alert-area').innerHTML = `
+            <div class="alert alert-error" style="color:var(--red)">${err.message}</div>`;
+        } else {
+          showAlert(err.message, 'error', document.getElementById('alert-area'));
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      }
+    });
+
+    async function resendVerify(email) {
+      try {
+        await resendVerification(email);
+        showAlert('Verification email sent!', 'success', document.getElementById('alert-area'));
       } catch (err) {
         showAlert(err.message, 'error', document.getElementById('alert-area'));
       }
-    });
+    }
   </script>
 </body>
 </html>

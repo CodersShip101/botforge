@@ -29,9 +29,49 @@ async function init() {
       email TEXT UNIQUE NOT NULL,
       username TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
+      is_verified INTEGER NOT NULL DEFAULT 0,
+      failed_login_attempts INTEGER NOT NULL DEFAULT 0,
+      locked_until DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      refresh_token TEXT NOT NULL,
+      user_agent TEXT DEFAULT '',
+      ip_address TEXT DEFAULT '',
+      device_name TEXT DEFAULT '',
+      last_used_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      expires_at DATETIME NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_sessions_refresh_token ON sessions(refresh_token);
+
+    CREATE TABLE IF NOT EXISTS email_verifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token TEXT NOT NULL,
+      expires_at DATETIME NOT NULL,
+      used INTEGER NOT NULL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_email_verifications_token ON email_verifications(token);
+
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token TEXT NOT NULL,
+      expires_at DATETIME NOT NULL,
+      used INTEGER NOT NULL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_password_resets_token ON password_resets(token);
 
     CREATE TABLE IF NOT EXISTS bots (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -107,22 +147,16 @@ async function init() {
     CREATE INDEX IF NOT EXISTS idx_backtest_trades_backtest_id ON backtest_trades(backtest_id);
   `);
 
-  // Add plan column to users if missing
-  try {
-    sqlDb.run("ALTER TABLE users ADD COLUMN plan TEXT NOT NULL DEFAULT 'free'");
-  } catch (e) { /* column already exists */ }
-  try {
-    sqlDb.run("ALTER TABLE users ADD COLUMN plan_updated_at DATETIME");
-  } catch (e) { /* column already exists */ }
-  try {
-    sqlDb.run("ALTER TABLE bots ADD COLUMN status TEXT NOT NULL DEFAULT 'draft'");
-  } catch (e) { /* column already exists */ }
-  try {
-    sqlDb.run("ALTER TABLE users ADD COLUMN reset_token TEXT");
-  } catch (e) { /* column already exists */ }
-  try {
-    sqlDb.run("ALTER TABLE users ADD COLUMN reset_token_expires DATETIME");
-  } catch (e) { /* column already exists */ }
+  // Add columns to existing tables (safe for upgrades)
+  const addCol = (table, col, def) => {
+    try { sqlDb.run(`ALTER TABLE ${table} ADD COLUMN ${col}`); } catch (e) { }
+  };
+  addCol('users', "plan TEXT NOT NULL DEFAULT 'free'");
+  addCol('users', 'plan_updated_at DATETIME');
+  addCol('users', "is_verified INTEGER NOT NULL DEFAULT 0");
+  addCol('users', 'failed_login_attempts INTEGER NOT NULL DEFAULT 0');
+  addCol('users', 'locked_until DATETIME');
+  addCol('bots', "status TEXT NOT NULL DEFAULT 'draft'");
 }
 
 function save() {
