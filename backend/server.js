@@ -31,6 +31,9 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/bots', botRoutes);
+app.use('/api/bots', require('./routes/versions'));
+app.use('/api/backtests', require('./routes/backtests'));
+app.use('/api/ai', require('./routes/ai'));
 
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);

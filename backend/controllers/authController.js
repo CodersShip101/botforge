@@ -76,7 +76,7 @@ exports.login = async (req, res) => {
 
 exports.me = async (req, res) => {
   try {
-    const user = db.prepare('SELECT id, email, username, created_at FROM users WHERE id = ?').get(req.user.userId);
+    const user = db.prepare('SELECT id, email, username, created_at, plan FROM users WHERE id = ?').get(req.user.userId);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -85,6 +85,43 @@ exports.me = async (req, res) => {
     res.json({ user });
   } catch (err) {
     console.error('Me error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.getPlan = async (req, res) => {
+  try {
+    const user = db.prepare('SELECT plan FROM users WHERE id = ?').get(req.user.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const { PLAN_LIMITS } = require('../middleware/planLimit');
+    const limits = PLAN_LIMITS[user.plan] || PLAN_LIMITS.free;
+
+    const botCount = db.prepare('SELECT COUNT(*) AS cnt FROM bots WHERE user_id = ?').get(req.user.userId);
+    const backtestCount = db.prepare("SELECT COUNT(*) AS cnt FROM backtests WHERE user_id = ? AND date(created_at) = date('now')").get(req.user.userId);
+
+    res.json({ plan: user.plan, limits, usage: { bots: botCount.cnt, backtestsToday: backtestCount.cnt } });
+  } catch (err) {
+    console.error('Get plan error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.upgradePlan = async (req, res) => {
+  try {
+    const { plan } = req.body;
+    const validPlans = ['free', 'pro', 'elite'];
+
+    if (!validPlans.includes(plan)) {
+      return res.status(400).json({ error: 'Invalid plan. Must be: free, pro, or elite.' });
+    }
+
+    db.prepare("UPDATE users SET plan = ?, plan_updated_at = datetime('now') WHERE id = ?").run(plan, req.user.userId);
+
+    const user = db.prepare('SELECT id, email, username, plan FROM users WHERE id = ?').get(req.user.userId);
+    res.json({ user, message: `Plan upgraded to ${plan}` });
+  } catch (err) {
+    console.error('Upgrade plan error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
