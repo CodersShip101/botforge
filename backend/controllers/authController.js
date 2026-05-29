@@ -125,3 +125,72 @@ exports.upgradePlan = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const user = db.prepare('SELECT id, email, username FROM users WHERE email = ?').get(email);
+
+    // Always return success to avoid email enumeration
+    if (!user) {
+      return res.json({ message: 'If this email exists, a reset link has been generated.' });
+    }
+
+    const token = require('crypto').randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 3600000).toISOString(); // 1 hour
+
+    db.prepare('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?').run(token, expires, user.id);
+
+    const resetLink = `${req.protocol}://${req.get('host')}/reset-password.html?token=${token}`;
+
+    console.log(`[VANTIS AI] Password reset link for ${email}: ${resetLink}`);
+
+    res.json({
+      message: 'If this email exists, a reset link has been generated.',
+      resetLink,
+      email,
+      providers: [
+        { name: 'Gmail', url: `https://mail.google.com` },
+        { name: 'Outlook', url: `https://outlook.live.com` },
+        { name: 'Yahoo', url: `https://mail.yahoo.com` }
+      ]
+    });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ error: 'Token and new password are required' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    const user = db.prepare("SELECT id, email FROM users WHERE reset_token = ? AND reset_token_expires > datetime('now')").get(token);
+
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid or expired reset token' });
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
+
+    db.prepare("UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?").run(password_hash, user.id);
+
+    res.json({ message: 'Password reset successful. You can now sign in.' });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

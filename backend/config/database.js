@@ -117,6 +117,12 @@ async function init() {
   try {
     sqlDb.run("ALTER TABLE bots ADD COLUMN status TEXT NOT NULL DEFAULT 'draft'");
   } catch (e) { /* column already exists */ }
+  try {
+    sqlDb.run("ALTER TABLE users ADD COLUMN reset_token TEXT");
+  } catch (e) { /* column already exists */ }
+  try {
+    sqlDb.run("ALTER TABLE users ADD COLUMN reset_token_expires DATETIME");
+  } catch (e) { /* column already exists */ }
 }
 
 function save() {
