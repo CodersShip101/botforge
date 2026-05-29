@@ -28,7 +28,22 @@
       try {
         await window.Clerk.load({ publishableKey: 'pk_test_cmVzdGVkLWhhcmUtMzUuY2xlcmsuYWNjb3VudHMuZGV2JA' });
 
-        if (window.Clerk.user) {
+        // Clerk v6: wait briefly for user to be available after OAuth redirect
+        let user = window.Clerk.user;
+        if (!user) {
+          try {
+            // If Clerk hasn't finished processing OAuth tokens, wait a bit
+            await new Promise(r => {
+              const unwatch = window.Clerk.addListener(payload => {
+                if (payload.user) { unwatch(); r(); }
+              });
+              setTimeout(() => { unwatch(); r(); }, 3000);
+            });
+            user = window.Clerk.user;
+          } catch {}
+        }
+
+        if (user) {
           const token = await window.Clerk.session?.getToken();
           if (token) {
             localStorage.setItem('clerk_session', token);

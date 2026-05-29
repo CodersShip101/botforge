@@ -110,8 +110,16 @@
         await window.Clerk.client.signUp.authenticateWithRedirect({
           strategy,
           redirectUrl: window.location.origin + '/oauth-callback.html',
-          redirectUrlComplete: window.location.origin + '/dashboard.html'
+          redirectUrlComplete: window.location.origin + '/oauth-callback.html'
         });
+        if (window.Clerk.user) {
+          const token = await window.Clerk.session?.getToken();
+          if (token) {
+            localStorage.setItem('clerk_session', token);
+            try { await syncClerkUser(token); } catch {}
+          }
+          window.location.href = 'dashboard.html';
+        }
       } catch (err) {
         setAlert('Social sign up failed: ' + (err.message || 'Unknown error'), 'error');
       }
