@@ -137,6 +137,70 @@ const Storage = {
 };
 
 // Online/offline bot operations
+
+async function autosaveBot(botId, config) {
+  if (isAuthenticated() && backendOnline !== false) {
+    try { return await fetchAPI(`/bots/${botId}/autosave`, 'POST', { configuration: config }); } catch (e) { /* silent */ }
+  }
+}
+
+async function getVersions(botId) {
+  if (isAuthenticated() && backendOnline !== false) {
+    try { return await fetchAPI(`/bots/${botId}/versions`); } catch (e) { /* fall through */ }
+  }
+  return [];
+}
+
+async function restoreVersion(botId, versionId) {
+  if (isAuthenticated() && backendOnline !== false) {
+    try { return await fetchAPI(`/bots/${botId}/versions/${versionId}/restore`, 'POST'); } catch (e) { throw e; }
+  }
+  throw new Error('Backend unavailable');
+}
+
+async function generateStrategy(prompt, market, risk) {
+  if (isAuthenticated() && backendOnline !== false) {
+    try { return await fetchAPI('/ai/strategy/generate', 'POST', { prompt, market, risk }); } catch (e) { throw e; }
+  }
+  throw new Error('Backend unavailable. AI generation requires server.');
+}
+
+async function explainStrategy(config) {
+  if (isAuthenticated() && backendOnline !== false) {
+    try { return await fetchAPI('/ai/strategy/explain', 'POST', { configuration: config }); } catch (e) { throw e; }
+  }
+  throw new Error('Backend unavailable');
+}
+
+async function runBacktest(botId, config, symbol, timeframe, days) {
+  if (isAuthenticated() && backendOnline !== false) {
+    try { return await fetchAPI('/backtests', 'POST', { botId, configuration: config, symbol, timeframe, days }); } catch (e) { throw e; }
+  }
+  throw new Error('Backend unavailable. Backtesting requires server.');
+}
+
+async function getBacktests(botId) {
+  if (isAuthenticated() && backendOnline !== false) {
+    try { return await fetchAPI(`/backtests/bot/${botId}`); } catch (e) { /* fall through */ }
+  }
+  return [];
+}
+
+async function getPlan() {
+  if (isAuthenticated() && backendOnline !== false) {
+    try { return await fetchAPI('/auth/plan'); } catch (e) { /* fall through */ }
+  }
+  return null;
+}
+
+async function upgradePlan(plan) {
+  if (isAuthenticated() && backendOnline !== false) {
+    try { return await fetchAPI('/auth/plan/upgrade', 'POST', { plan }); } catch (e) { throw e; }
+  }
+  throw new Error('Backend unavailable');
+}
+
+// Online/offline bot operations
 async function getBots() {
   if (isAuthenticated() && backendOnline !== false) {
     try { return await fetchAPI('/bots'); } catch (e) { /* fall through */ }

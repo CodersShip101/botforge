@@ -46,6 +46,8 @@
           <div id="quick-stats">
             <div class="stat-item"><span class="stat-item-label">Total Bots</span><span class="stat-item-value" id="stat-total">0</span></div>
             <div class="stat-item"><span class="stat-item-label">Strategies</span><span class="stat-item-value" id="stat-strategies">-</span></div>
+            <div class="stat-item"><span class="stat-item-label">Plan</span><span class="stat-item-value" id="stat-plan">-</span></div>
+            <div class="stat-item" id="stat-backtests-container" style="display:none"><span class="stat-item-label">Backtests Today</span><span class="stat-item-value" id="stat-backtests">-</span></div>
           </div>
         </div>
       </aside>
@@ -63,12 +65,55 @@
     </div>
   </div>
 
+  <!-- Backtest Modal -->
+  <div class="modal-overlay" id="backtest-modal">
+    <div class="modal" style="max-width:700px">
+      <button class="modal-close" onclick="closeBacktestModal()">&times;</button>
+      <h2>Run Backtest</h2>
+      <p id="backtest-modal-bot-name"></p>
+      <div id="backtest-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Symbol</label>
+            <select id="bt-symbol"><option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option><option>AUDUSD</option><option>BTCUSD</option></select>
+          </div>
+          <div class="form-group">
+            <label>Timeframe</label>
+            <select id="bt-timeframe"><option>M15</option><option>M30</option><option selected>H1</option><option>H4</option><option>D1</option></select>
+          </div>
+          <div class="form-group">
+            <label>Days</label>
+            <select id="bt-days"><option value="30">30</option><option value="90">90</option><option selected value="180">180</option><option value="365">365</option></select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary btn-md" onclick="runBacktestForBot()">Run Backtest</button>
+        </div>
+      </div>
+      <div id="backtest-results" style="display:none"></div>
+    </div>
+  </div>
+
   <script src="js/code-generator-mt4.js"></script>
   <script src="js/code-generator-mt5.js"></script>
   <script src="js/app.js"></script>
   <script>
+    let backtestingBotId = null;
+
     async function initDashboard() {
       await renderBots();
+      await loadPlanInfo();
+    }
+
+    async function loadPlanInfo() {
+      try {
+        const planData = await getPlan();
+        if (planData) {
+          document.getElementById('stat-plan').textContent = capitalize(planData.plan);
+          document.getElementById('stat-backtests').textContent = `${planData.usage.backtestsToday}/${planData.limits.maxBacktestsPerDay}`;
+          document.getElementById('stat-backtests-container').style.display = 'flex';
+        }
+      } catch {}
     }
 
     function updateQuickStats(bots) {
@@ -107,6 +152,7 @@
                 <a href="builder.html?edit=${bot.id}" class="btn btn-outline">Edit</a>
                 <button class="btn btn-primary" onclick="downloadBot('${bot.id}', 'mt4')">.mq4</button>
                 <button class="btn btn-success" onclick="downloadBot('${bot.id}', 'mt5')">.mq5</button>
+                <button class="btn btn-accent" onclick="openBacktestModal('${bot.id}', '${bot.name.replace(/'/g, "\\'")}')">Backtest</button>
                 <button class="btn btn-danger" onclick="deleteBot('${bot.id}')">Delete</button>
               </div>
             </div>`;
@@ -128,6 +174,64 @@
       } catch (err) {
         showAlert('Error deleting bot: ' + err.message, 'error');
       }
+    }
+
+    function openBacktestModal(botId, botName) {
+      backtestingBotId = botId;
+      document.getElementById('backtest-modal-bot-name').textContent = `Bot: ${botName}`;
+      document.getElementById('backtest-form').style.display = 'block';
+      document.getElementById('backtest-results').style.display = 'none';
+      document.getElementById('backtest-modal').classList.add('show');
+    }
+
+    function closeBacktestModal() {
+      document.getElementById('backtest-modal').classList.remove('show');
+      backtestingBotId = null;
+    }
+
+    async function runBacktestForBot() {
+      const bot = await getBot(backtestingBotId);
+      if (!bot) { showAlert('Bot not found', 'error'); return; }
+
+      const symbol = document.getElementById('bt-symbol').value;
+      const timeframe = document.getElementById('bt-timeframe').value;
+      const days = parseInt(document.getElementById('bt-days').value);
+
+      document.getElementById('backtest-form').style.display = 'none';
+      const resultsDiv = document.getElementById('backtest-results');
+      resultsDiv.style.display = 'block';
+      resultsDiv.innerHTML = '<p style="text-align:center;color:var(--accent)">Running backtest...</p>';
+
+      try {
+        const result = await runBacktest(backtestingBotId, bot.configuration, symbol, timeframe, days);
+        displayBacktestResults(result);
+      } catch (err) {
+        resultsDiv.innerHTML = `<p style="color:var(--red)">Error: ${err.message}</p>
+          <button class="btn btn-outline btn-md" onclick="document.getElementById('backtest-form').style.display='block';resultsDiv.style.display='none'">Try Again</button>`;
+      }
+    }
+
+    function displayBacktestResults(result) {
+      const m = result.metrics;
+      const div = document.getElementById('backtest-results');
+      div.innerHTML = `
+        <h3 style="margin-bottom:12px">Backtest Results</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:0.85rem;margin-bottom:16px">
+          <div class="stat-item"><span class="stat-item-label">Total Trades</span><span class="stat-item-value">${m.totalTrades}</span></div>
+          <div class="stat-item"><span class="stat-item-label">Win Rate</span><span class="stat-item-value">${(m.winRate * 100).toFixed(1)}%</span></div>
+          <div class="stat-item"><span class="stat-item-label">Profit Factor</span><span class="stat-item-value">${m.profitFactor.toFixed(2)}</span></div>
+          <div class="stat-item"><span class="stat-item-label">Net Profit</span><span class="stat-item-value" style="color:${m.netProfit >= 0 ? 'var(--green)' : 'var(--red)'}">${m.netProfit >= 0 ? '+' : ''}$${m.netProfit.toFixed(2)}</span></div>
+          <div class="stat-item"><span class="stat-item-label">Max Drawdown</span><span class="stat-item-value" style="color:var(--red)">${(m.maxDrawdown * 100).toFixed(1)}%</span></div>
+          <div class="stat-item"><span class="stat-item-label">Sharpe Ratio</span><span class="stat-item-value" style="color:${m.sharpeRatio >= 1 ? 'var(--green)' : 'var(--text-muted)'}">${m.sharpeRatio.toFixed(2)}</span></div>
+          <div class="stat-item"><span class="stat-item-label">Avg R:R</span><span class="stat-item-value">${m.avgRR.toFixed(2)}</span></div>
+          <div class="stat-item"><span class="stat-item-label">Best Trade</span><span class="stat-item-value" style="color:var(--green)">+$${m.bestTrade.toFixed(2)}</span></div>
+          <div class="stat-item"><span class="stat-item-label">Worst Trade</span><span class="stat-item-value" style="color:var(--red)">-$${Math.abs(m.worstTrade).toFixed(2)}</span></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-md" onclick="document.getElementById('backtest-form').style.display='block';this.parentElement.parentElement.querySelector('h3').textContent='Backtest Results'">Run Again</button>
+          <button class="btn btn-primary btn-md" onclick="closeBacktestModal()">Close</button>
+        </div>
+      `;
     }
   </script>
 </body>

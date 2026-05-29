@@ -35,6 +35,33 @@
     </div>
   </div>
 
+  <!-- AI Assist Modal -->
+  <div class="modal-overlay" id="ai-modal">
+    <div class="modal" style="max-width:600px">
+      <button class="modal-close" onclick="closeAIModal()">&times;</button>
+      <h2>AI Strategy Generator</h2>
+      <p>Describe your trading strategy in natural language. VANTIS AI will analyze your requirements and generate an optimal configuration.</p>
+      <div class="form-group">
+        <label for="ai-prompt">Describe your strategy</label>
+        <textarea id="ai-prompt" rows="3" placeholder="e.g. I want a trend-following bot that uses RSI and EMA crossover on EURUSD H1, with tight stop losses and trailing stops..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Market</label>
+          <select id="ai-market"><option value="forex">Forex</option><option value="crypto">Crypto</option><option value="indices">Indices</option></select>
+        </div>
+        <div class="form-group">
+          <label>Risk Profile</label>
+          <select id="ai-risk"><option value="low">Low</option><option selected value="medium">Medium</option><option value="high">High</option></select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary btn-md" onclick="runAIGenerate()">Generate Strategy</button>
+      </div>
+      <div id="ai-result" style="display:none;margin-top:16px"></div>
+    </div>
+  </div>
+
   <script src="js/code-generator-mt4.js"></script>
   <script src="js/code-generator-mt5.js"></script>
   <script src="js/app.js"></script>

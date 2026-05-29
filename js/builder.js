@@ -4,8 +4,38 @@ let builderState = {
   config: Storage.getDefaultConfig(),
   name: '',
   description: '',
-  editingId: null
+  editingId: null,
+  autosaveTimer: null,
+  saving: false
 };
+
+function scheduleAutosave() {
+  if (!builderState.editingId) return;
+  if (builderState.autosaveTimer) clearTimeout(builderState.autosaveTimer);
+  builderState.autosaveTimer = setTimeout(async () => {
+    if (builderState.saving) return;
+    builderState.saving = true;
+    try {
+      collectFormData();
+      await autosaveBot(builderState.editingId, builderState.config);
+    } catch { /* silent */ }
+    builderState.saving = false;
+  }, 3000);
+}
+
+function triggerAutosave() {
+  collectFormData();
+  if (builderState.autosaveTimer) clearTimeout(builderState.autosaveTimer);
+  builderState.autosaveTimer = setTimeout(async () => {
+    if (builderState.saving) return;
+    builderState.saving = true;
+    try {
+      await autosaveBot(builderState.editingId, builderState.config);
+      showAlert('Bot auto-saved', 'success');
+    } catch { /* silent */ }
+    builderState.saving = false;
+  }, 500);
+}
 
 const STEPS = [
   { id: 'basics', title: 'Bot Name' },
@@ -56,7 +86,7 @@ function renderStep(step) {
   builderState.step = step;
   renderSidebar();
   const steps = [renderBasics, renderStrategy, renderMoneyMgmt, renderTradeMgmt, renderEntryRules, renderPreview];
-  steps[step]();
+  Promise.resolve(steps[step]()).catch(console.error);
 }
 
 function setupPlatformToggle() {
@@ -178,7 +208,10 @@ function renderStrategy() {
 
     <div class="form-actions">
       <button class="btn btn-outline btn-md" onclick="prevStep()">Previous</button>
-      <button class="btn btn-primary btn-md" onclick="nextStep()">Next</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-accent btn-md" onclick="openAIModal()">AI Assist</button>
+        <button class="btn btn-primary btn-md" onclick="nextStep()">Next</button>
+      </div>
     </div>
   `;
 
@@ -191,6 +224,46 @@ function renderStrategy() {
   });
 }
 
+function openAIModal() {
+  document.getElementById('ai-prompt').value = '';
+  document.getElementById('ai-result').style.display = 'none';
+  document.getElementById('ai-modal').classList.add('show');
+}
+
+function closeAIModal() {
+  document.getElementById('ai-modal').classList.remove('show');
+}
+
+async function runAIGenerate() {
+  const prompt = document.getElementById('ai-prompt').value.trim();
+  if (!prompt) { showAlert('Please describe your strategy', 'error'); return; }
+  const market = document.getElementById('ai-market').value;
+  const risk = document.getElementById('ai-risk').value;
+
+  const resultDiv = document.getElementById('ai-result');
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = '<p style="text-align:center;color:var(--accent)">Generating strategy...</p>';
+
+  try {
+    const data = await generateStrategy(prompt, market, risk);
+    builderState.config = data.configuration;
+    resultDiv.innerHTML = `
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px">
+        <h4 style="margin-bottom:8px;color:var(--accent)">Strategy Generated</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:0.85rem;color:var(--text-muted);margin-bottom:8px">
+          <div><strong>Type:</strong> ${capitalize(data.configuration.strategy)}</div>
+          <div><strong>Risk:</strong> ${capitalize(data.riskProfile)}</div>
+          <div><strong>Market:</strong> ${capitalize(data.market)}</div>
+        </div>
+        <p style="color:var(--text);font-size:0.9rem;margin-bottom:12px">${data.explanation}</p>
+        <button class="btn btn-primary btn-sm" onclick="closeAIModal();renderStrategy()">Apply & Close</button>
+      </div>
+    `;
+  } catch (err) {
+    resultDiv.innerHTML = `<p style="color:var(--red)">Error: ${err.message}</p>`;
+  }
+}
+
 function updateConfig(path, value) {
   const parts = path.split('.');
   let obj = builderState.config;
@@ -199,6 +272,7 @@ function updateConfig(path, value) {
     obj = obj[parts[i]];
   }
   obj[parts[parts.length - 1]] = value;
+  scheduleAutosave();
 }
 
 function renderMoneyMgmt() {
@@ -314,7 +388,7 @@ function renderEntryRules() {
   `;
 }
 
-function renderPreview() {
+async function renderPreview() {
   collectFormData();
   const platform = builderState.platform;
   const c = builderState.config;
@@ -326,6 +400,8 @@ function renderPreview() {
 
   const main = document.getElementById('step-content');
   if (!main) return;
+
+  const versionHistory = builderState.editingId ? await getVersions(builderState.editingId) : [];
 
   main.innerHTML = `
     <h2>Preview &amp; Download</h2>
@@ -352,6 +428,19 @@ function renderPreview() {
       <div class="preview-box" id="code-preview">${code.slice(0, 3000)}${code.length > 3000 ? '\n/* ... truncated ... */' : ''}</div>
     </div>
 
+    ${versionHistory.length > 1 ? `
+    <div class="preview-section" style="margin-top:16px">
+      <h3>Version History (${versionHistory.length})</h3>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+        ${versionHistory.slice(0, 10).map(v => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem">
+            <span style="color:var(--text-muted)">${v.label || 'Autosave'} — ${formatDate(v.created_at)}</span>
+            <button class="btn btn-outline btn-sm" onclick="restoreVersionHandler('${v.id}')">Restore</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>` : ''}
+
     <div class="form-actions">
       <button class="btn btn-outline btn-md" onclick="prevStep()">Previous</button>
       <div style="display:flex;gap:8px">
@@ -359,6 +448,18 @@ function renderPreview() {
       </div>
     </div>
   `;
+}
+
+async function restoreVersionHandler(versionId) {
+  if (!confirm('Restore this version? Current changes will be overwritten.')) return;
+  try {
+    const data = await restoreVersion(builderState.editingId, versionId);
+    builderState.config = data.configuration;
+    showAlert('Version restored!', 'success');
+    renderPreview();
+  } catch (err) {
+    showAlert('Error restoring version: ' + err.message, 'error');
+  }
 }
 
 function nextStep() {
@@ -379,8 +480,13 @@ async function saveAndDownload() {
     let bot;
     if (builderState.editingId) {
       bot = await updateBot(builderState.editingId, { name: builderState.name, description: builderState.description, configuration: builderState.config });
+      if (isAuthenticated() && backendOnline !== false) {
+        try { await fetchAPI(`/bots/${builderState.editingId}/versions`, 'POST', { configuration: builderState.config, label: 'Manual save' }); } catch {}
+      }
     } else {
       bot = await createBot(builderState.name, builderState.description, builderState.config);
+      builderState.editingId = bot.id;
+      window.history.replaceState(null, '', `?edit=${bot.id}`);
     }
 
     const ext = builderState.platform === 'mt4' ? 'mq4' : 'mq5';
