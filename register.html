@@ -23,97 +23,82 @@
 
   <div class="container">
     <div style="max-width:420px;margin:60px auto">
-      <div id="step-signup">
-        <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:8px">Create Account</h1>
-        <p style="color:var(--text-muted);margin-bottom:24px">Free. No coding. Start building AI trading bots.</p>
-        <div id="alert-area"></div>
+      <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:8px">Create Account</h1>
+      <p style="color:var(--text-muted);margin-bottom:24px">Free. No coding. Start building AI trading bots.</p>
+      <div id="alert-area"></div>
 
-        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-          <button class="social-btn social-btn-google" onclick="startOAuth('google')" id="btn-google">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#4285F4" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#34A853" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Continue with Google
-          </button>
-          <button class="social-btn social-btn-microsoft" onclick="startOAuth('microsoft')" id="btn-microsoft">
-            <svg width="20" height="20" viewBox="0 0 23 23"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="12" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="12" width="10" height="10" fill="#00A4EF"/><rect x="12" y="12" width="10" height="10" fill="#FFB900"/></svg>
-            Continue with Microsoft
-          </button>
-          <button class="social-btn social-btn-apple" onclick="startOAuth('apple')" id="btn-apple">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-            Continue with Apple
-          </button>
-        </div>
-
-        <div class="social-divider">or sign up with email</div>
-
-        <form id="register-form">
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required placeholder="Choose a username">
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required placeholder="you@example.com">
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required minlength="6" placeholder="At least 6 characters">
-            <div id="password-strength" style="margin-top:6px;height:4px;background:var(--border);border-radius:2px;overflow:hidden">
-              <div id="strength-bar" style="height:100%;width:0;border-radius:2px;transition:all 0.3s"></div>
-            </div>
-            <p id="strength-text" style="font-size:0.75rem;color:var(--text-muted);margin-top:4px"></p>
-          </div>
-          <button type="submit" class="btn btn-primary btn-md" style="width:100%">Create Account</button>
-        </form>
-        <p style="margin-top:16px;text-align:center;color:var(--text-muted);font-size:0.9rem">
-          Already have an account? <a href="login.html">Sign In</a>
-        </p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+        <button class="social-btn social-btn-google" onclick="clerkOAuth('oauth_google')" id="btn-google">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#4285F4" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#34A853" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+        <button class="social-btn social-btn-microsoft" onclick="clerkOAuth('oauth_microsoft')" id="btn-microsoft">
+          <svg width="20" height="20" viewBox="0 0 23 23"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="12" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="12" width="10" height="10" fill="#00A4EF"/><rect x="12" y="12" width="10" height="10" fill="#FFB900"/></svg>
+          Continue with Microsoft
+        </button>
+        <button class="social-btn social-btn-apple" onclick="clerkOAuth('oauth_apple')" id="btn-apple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+          Continue with Apple
+        </button>
       </div>
 
-      <div id="step-verify" style="display:none">
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;text-align:center">
-          <h2 style="margin-bottom:12px">Check Your Email</h2>
-          <p style="color:var(--text-muted);margin-bottom:20px;line-height:1.6">
-          We sent a verification link to <strong id="verify-email-display" style="color:var(--text)"></strong>.<br>
-          Click the link to activate your account.
-          </p>
-          <p style="color:var(--text-muted);font-size:0.85rem">
-            Didn't get the email? <a href="#" id="resend-verify-link">Resend</a>
-          </p>
-          <p style="margin-top:16px;font-size:0.85rem">
-            <a href="login.html">Go to Sign In</a>
-          </p>
+      <div class="social-divider">or sign up with email</div>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required placeholder="Choose a username">
         </div>
-      </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required minlength="8" placeholder="At least 8 characters">
+          <div id="password-strength" style="margin-top:6px;height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+            <div id="strength-bar" style="height:100%;width:0;border-radius:2px;transition:all 0.3s"></div>
+          </div>
+          <p id="strength-text" style="font-size:0.75rem;color:var(--text-muted);margin-top:4px"></p>
+        </div>
+        <button type="submit" class="btn btn-primary btn-md" style="width:100%" id="submit-btn">Create Account</button>
+      </form>
+      <p style="margin-top:16px;text-align:center;color:var(--text-muted);font-size:0.9rem">
+        Already have an account? <a href="login.html">Sign In</a>
+      </p>
     </div>
   </div>
 
+  <script
+    data-clerk-publishable-key="pk_test_Y2xlcmsuc2hpbmluZy1iaXJkLTQyLmNsZXJrLmFjY291bnRzLmRldiQ"
+    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+    crossorigin="anonymous"
+    onload="initClerk()"
+  ></script>
   <script src="js/app.js"></script>
   <script>
-    async function startOAuth(provider) {
-      const btn = document.getElementById('btn-' + provider);
-      const originalHTML = btn.innerHTML;
-      btn.disabled = true;
-      btn.textContent = 'Redirecting...';
+    let clerkReady = false;
+
+    function initClerk() {
+      window.Clerk.load({ publishableKey: 'pk_test_Y2xlcmsuc2hpbmluZy1iaXJkLTQyLmNsZXJrLmFjY291bnRzLmRldiQ' })
+        .then(() => { clerkReady = true; })
+        .catch(err => console.error('Clerk init error:', err));
+    }
+
+    async function clerkOAuth(strategy) {
+      if (!clerkReady) { showAlert('Loading, please wait...', 'info', document.getElementById('alert-area')); return; }
       try {
-        const data = await fetchAPI('/auth/oauth/' + provider, 'GET');
-        if (!data.configured) {
-          showAlert(provider.charAt(0).toUpperCase() + provider.slice(1) + ' sign up not configured yet. Use email instead.', 'info', document.getElementById('alert-area'));
-          btn.disabled = false;
-          btn.innerHTML = originalHTML;
-          return;
-        }
-        window.location.href = data.url;
+        const signUp = await window.Clerk.client.signUp.create({ strategy });
+        window.location.href = signUp.verification.externalRedirect.url;
       } catch (err) {
-        showAlert('Social sign up unavailable. Use email instead.', 'info', document.getElementById('alert-area'));
-        btn.disabled = false;
-        btn.innerHTML = originalHTML;
+        showAlert('Social sign up failed: ' + (err.message || 'Unknown error'), 'error', document.getElementById('alert-area'));
       }
     }
 
     function checkStrength(password) {
       let score = 0;
-      if (password.length >= 6) score += 20;
-      if (password.length >= 10) score += 20;
+      if (password.length >= 8) score += 20;
+      if (password.length >= 12) score += 20;
       if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 20;
       if (/[0-9]/.test(password)) score += 20;
       if (/[^a-zA-Z0-9]/.test(password)) score += 20;
@@ -125,64 +110,35 @@
       const bar = document.getElementById('strength-bar');
       const text = document.getElementById('strength-text');
       bar.style.width = score + '%';
-      if (score < 40) {
-        bar.style.background = 'var(--red)';
-        text.textContent = 'Weak';
-        text.style.color = 'var(--red)';
-      } else if (score < 80) {
-        bar.style.background = '#FFA500';
-        text.textContent = 'Medium';
-        text.style.color = '#FFA500';
-      } else {
-        bar.style.background = 'var(--green)';
-        text.textContent = 'Strong';
-        text.style.color = 'var(--green)';
-      }
+      if (score < 40) { bar.style.background = 'var(--red)'; text.textContent = 'Weak'; text.style.color = 'var(--red)'; }
+      else if (score < 80) { bar.style.background = '#FFA500'; text.textContent = 'Medium'; text.style.color = '#FFA500'; }
+      else { bar.style.background = 'var(--green)'; text.textContent = 'Strong'; text.style.color = 'var(--green)'; }
     });
-
-    let lastSignupEmail = '';
 
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!clerkReady) { showAlert('Loading, please wait...', 'info', document.getElementById('alert-area')); return; }
       const username = document.getElementById('username').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const btn = e.target.querySelector('button');
+      const btn = document.getElementById('submit-btn');
       btn.disabled = true;
       btn.textContent = 'Creating account...';
 
       try {
-        const res = await signup(email, username, password);
-        lastSignupEmail = email;
-        document.getElementById('verify-email-display').textContent = email;
-
-        const providers = document.getElementById('verify-providers');
-        const icons = {
-          Gmail: '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.691 2.28 24 3.434 24 5.457z"/></svg>',
-          Outlook: '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#0078D4" d="M24 7.48v11.675c0 .622-.505 1.128-1.128 1.128H12.5v-9.187l3-2.25L24 7.48zM12.5 20.283H1.128C.505 20.283 0 19.778 0 19.155V7.48l9 6.75 3.5-2.625 3 2.25v9.428zM4.5 3.25L12.5 0l7.5 3.25v3.5L12.5 10 4.5 6.75V3.25z"/></svg>',
-          Yahoo: '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#6001D2" d="M10.5 2.25L6.75 9.75l5.25 9.75H9l-3.75-7.5L1.5 19.5H0l5.25-9.75L0 2.25h3.75L7.5 9.75 11.25 2.25H10.5zm6 0L12.75 9.75 18 19.5h-3.75l-5.25-9.75 5.25-9.75h2.25zm3.75 3a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5z"/></svg>'
-        };
-        providers.innerHTML = (res.providers || [{name:'Gmail',url:'https://mail.google.com'},{name:'Outlook',url:'https://outlook.live.com'},{name:'Yahoo',url:'https://mail.yahoo.com'}])
-          .map(p => `<a href="${p.url}" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text);font-size:0.85rem;font-weight:600;text-decoration:none;transition:all 0.2s">${icons[p.name]||''} ${p.name}</a>`).join('');
-
-        document.getElementById('step-signup').style.display = 'none';
-        document.getElementById('step-verify').style.display = 'block';
+        const signUp = await window.Clerk.client.signUp.create({ emailAddress: email, password, username });
+        if (signUp.status === 'complete') {
+          await window.Clerk.setActive({ session: signUp.createdSessionId });
+          localStorage.setItem('clerk_session', signUp.createdSessionId);
+          window.location.href = 'dashboard.html';
+        } else {
+          showAlert('Please check your email to verify your account.', 'info', document.getElementById('alert-area'));
+        }
       } catch (err) {
-        showAlert(err.message, 'error', document.getElementById('alert-area'));
+        showAlert(err.errors?.[0]?.message || err.message || 'Registration failed', 'error', document.getElementById('alert-area'));
       } finally {
         btn.disabled = false;
         btn.textContent = 'Create Account';
-      }
-    });
-
-    document.getElementById('resend-verify-link').addEventListener('click', async (e) => {
-      e.preventDefault();
-      if (!lastSignupEmail) return;
-      try {
-        await resendVerification(lastSignupEmail);
-        showAlert('Verification email resent!', 'success', document.getElementById('alert-area'));
-      } catch (err) {
-        showAlert(err.message, 'error', document.getElementById('alert-area'));
       }
     });
   </script>

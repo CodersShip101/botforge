@@ -1,9 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const versionController = require('../controllers/versionController');
-const authenticateToken = require('../middleware/auth');
-
-router.use(authenticateToken);
 
 router.post('/:botId/versions', versionController.saveVersion);
 router.post('/:botId/autosave', versionController.autosave);

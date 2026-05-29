@@ -1,19 +1,43 @@
+const fs = require('fs');
+const path = require('path');
 const db = require('../config/database');
 const request = require('supertest');
+
+// Mock Clerk verifyToken to bypass actual auth in tests
+jest.mock('@clerk/backend', () => ({
+  createClerkClient: jest.fn(() => ({
+    users: {
+      getUser: jest.fn(() => Promise.resolve({
+        emailAddresses: [{ emailAddress: 'test-user@test.com' }],
+        username: 'testuser'
+      })),
+      getUserSessionList: jest.fn(() => Promise.resolve([]))
+    },
+    sessions: {
+      revoke: jest.fn(() => Promise.resolve())
+    },
+    verifyToken: jest.fn(() => Promise.resolve({ sub: 'test_clerk_user_123', sid: 'test_session' }))
+  })),
+  verifyToken: jest.fn(() => Promise.resolve({ sub: 'test_clerk_user_123', sid: 'test_session' }))
+}));
+
 const app = require('../server');
 
-let testToken = '';
+let testToken = 'mock_jwt_token_xyz';
 let testBotId = null;
 
 beforeAll(async () => {
+  // Remove old DB file so updated schema (nullable password_hash) takes effect
+  const dbPath = path.join(__dirname, '..', 'data', 'botforge.db');
+  try { fs.unlinkSync(dbPath); } catch (e) {}
+  try { fs.unlinkSync(dbPath + '-wal'); } catch (e) {}
+  try { fs.unlinkSync(dbPath + '-shm'); } catch (e) {}
   await db.init();
   try {
     db.prepare('DELETE FROM downloads').run();
     db.prepare('DELETE FROM bots').run();
     db.prepare("DELETE FROM users WHERE email LIKE 'test-%'").run();
-  } catch (e) {
-    // table may not exist
-  }
+  } catch (e) {}
 });
 
 afterAll(() => {
@@ -26,60 +50,40 @@ afterAll(() => {
 });
 
 describe('Auth API', () => {
-  test('POST /api/auth/register - creates user', async () => {
+  test('POST /api/auth/sync - syncs Clerk user', async () => {
     const res = await request(app)
-      .post('/api/auth/register')
-      .send({ email: 'test-user@test.com', username: 'testuser', password: 'password123' });
-    expect(res.status).toBe(201);
-    expect(res.body.access_token).toBeDefined();
-    expect(res.body.user.email).toBe('test-user@test.com');
-    testToken = res.body.access_token;
-    // Mark user as verified for subsequent tests
-    const user = db.prepare('SELECT id FROM users WHERE email = ?').get('test-user@test.com');
-    if (user) db.prepare('UPDATE users SET is_verified = 1 WHERE id = ?').run(user.id);
-  });
-
-  test('POST /api/auth/register - rejects duplicate', async () => {
-    const res = await request(app)
-      .post('/api/auth/register')
-      .send({ email: 'test-user@test.com', username: 'testuser2', password: 'password123' });
-    expect(res.status).toBe(409);
-  });
-
-  test('POST /api/auth/register - requires fields', async () => {
-    const res = await request(app)
-      .post('/api/auth/register')
-      .send({ email: 'test2@test.com' });
-    expect(res.status).toBe(400);
-  });
-
-  test('POST /api/auth/login - logs in', async () => {
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'test-user@test.com', password: 'password123' });
+      .post('/api/auth/sync')
+      .set('Authorization', `Bearer ${testToken}`)
+      .send({ userId: 'test_clerk_user_123', email: 'test-user@test.com', username: 'testuser' });
     expect(res.status).toBe(200);
-    expect(res.body.access_token).toBeDefined();
-    testToken = res.body.access_token;
+    expect(res.body.email).toBe('test-user@test.com');
+    expect(res.body.plan).toBe('free');
   });
 
-  test('POST /api/auth/login - rejects bad password', async () => {
+  test('GET /api/auth/plan - returns plan', async () => {
     const res = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'test-user@test.com', password: 'wrong' });
-    expect(res.status).toBe(401);
-  });
-
-  test('GET /api/auth/me - returns user', async () => {
-    const res = await request(app)
-      .get('/api/auth/me')
+      .get('/api/auth/plan')
       .set('Authorization', `Bearer ${testToken}`);
     expect(res.status).toBe(200);
-    expect(res.body.user.email).toBe('test-user@test.com');
+    expect(res.body.plan).toBeDefined();
+    expect(res.body.limits).toBeDefined();
   });
 
-  test('GET /api/auth/me - rejects no token', async () => {
-    const res = await request(app).get('/api/auth/me');
-    expect(res.status).toBe(401);
+  test('POST /api/auth/plan/upgrade - upgrades plan', async () => {
+    const res = await request(app)
+      .post('/api/auth/plan/upgrade')
+      .set('Authorization', `Bearer ${testToken}`)
+      .send({ plan: 'pro' });
+    expect(res.status).toBe(200);
+    expect(res.body.message).toContain('pro');
+  });
+
+  test('GET /api/auth/plan - reflects upgraded plan', async () => {
+    const res = await request(app)
+      .get('/api/auth/plan')
+      .set('Authorization', `Bearer ${testToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.plan).toBe('pro');
   });
 });
 

@@ -28,7 +28,7 @@ async function init() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT UNIQUE NOT NULL,
       username TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
+      password_hash TEXT DEFAULT '',
       is_verified INTEGER NOT NULL DEFAULT 0,
       failed_login_attempts INTEGER NOT NULL DEFAULT 0,
       locked_until DATETIME,
@@ -156,6 +156,7 @@ async function init() {
   addCol('users', "is_verified INTEGER NOT NULL DEFAULT 0");
   addCol('users', 'failed_login_attempts INTEGER NOT NULL DEFAULT 0');
   addCol('users', 'locked_until DATETIME');
+  addCol('users', 'clerk_id TEXT');
   addCol('bots', "status TEXT NOT NULL DEFAULT 'draft'");
 }
 

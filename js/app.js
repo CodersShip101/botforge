@@ -1,7 +1,33 @@
 const API_BASE = '/api';
-
 let backendOnline = null;
-let refreshPromise = null;
+
+// Clerk session helpers
+async function getClerkToken() {
+  if (window.Clerk?.session) {
+    try { return await window.Clerk.session.getToken(); } catch { return null; }
+  }
+  return localStorage.getItem('clerk_session') || null;
+}
+
+function isAuthenticated() {
+  return !!(window.Clerk?.user) || !!localStorage.getItem('clerk_session');
+}
+
+async function syncClerkUser(token) {
+  const user = window.Clerk?.user;
+  if (!user) return null;
+  const res = await fetch(`${API_BASE}/auth/sync`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({
+      userId: user.id,
+      email: user.primaryEmailAddress?.emailAddress || '',
+      username: user.username || user.fullName || ''
+    })
+  });
+  if (!res.ok) return null;
+  return await res.json();
+}
 
 async function checkBackend() {
   try {
@@ -13,62 +39,9 @@ async function checkBackend() {
   return backendOnline;
 }
 
-function getAccessToken() {
-  return localStorage.getItem('access_token');
-}
-
-function getRefreshToken() {
-  return localStorage.getItem('refresh_token');
-}
-
-function setTokens(accessToken, refreshToken) {
-  if (accessToken) localStorage.setItem('access_token', accessToken);
-  if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
-}
-
-function clearTokens() {
-  localStorage.removeItem('access_token');
-  localStorage.removeItem('refresh_token');
-  localStorage.removeItem('user');
-}
-
-async function refreshAccessToken() {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return null;
-
-  if (refreshPromise) return refreshPromise;
-
-  refreshPromise = (async () => {
-    try {
-      const res = await fetch(`${API_BASE}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: refreshToken }),
-        signal: AbortSignal.timeout(10000)
-      });
-
-      if (!res.ok) {
-        clearTokens();
-        return null;
-      }
-
-      const data = await res.json();
-      setTokens(data.access_token, data.refresh_token);
-      return data.access_token;
-    } catch {
-      clearTokens();
-      return null;
-    } finally {
-      refreshPromise = null;
-    }
-  })();
-
-  return refreshPromise;
-}
-
 async function fetchAPI(path, method = 'GET', body = null) {
+  const token = await getClerkToken();
   const headers = { 'Content-Type': 'application/json' };
-  const token = getAccessToken();
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   let res;
@@ -83,20 +56,6 @@ async function fetchAPI(path, method = 'GET', body = null) {
     throw new Error('Backend unavailable.');
   }
 
-  // Try token refresh on 401
-  if (res.status === 401 && getRefreshToken()) {
-    const newToken = await refreshAccessToken();
-    if (newToken) {
-      headers['Authorization'] = `Bearer ${newToken}`;
-      res = await fetch(`${API_BASE}${path}`, {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : undefined,
-        signal: AbortSignal.timeout(10000)
-      });
-    }
-  }
-
   if (path.includes('/download')) {
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: 'Download failed' }));
@@ -108,33 +67,6 @@ async function fetchAPI(path, method = 'GET', body = null) {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Request failed');
   return data;
-}
-
-// Auth helpers
-async function signup(email, username, password) {
-  const data = await fetchAPI('/auth/signup', 'POST', { email, username, password });
-  if (data.access_token) setTokens(data.access_token, data.refresh_token);
-  if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
-  return data;
-}
-
-async function signin(email, password) {
-  const data = await fetchAPI('/auth/signin', 'POST', { email, password });
-  if (data.access_token) setTokens(data.access_token, data.refresh_token);
-  if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
-  return data;
-}
-
-async function signout() {
-  try {
-    const token = getAccessToken();
-    if (token) await fetchAPI('/auth/signout', 'POST');
-  } catch { /* ignore */ }
-  clearTokens();
-}
-
-function isAuthenticated() {
-  return !!getAccessToken();
 }
 
 function requireAuth() {
@@ -223,7 +155,6 @@ const Storage = {
   }
 };
 
-// Online/offline bot operations
 async function getBots() {
   if (isAuthenticated() && backendOnline !== false) {
     try { return await fetchAPI('/bots'); } catch (e) { /* fall through */ }
@@ -276,10 +207,8 @@ async function downloadBotCode(id, platform) {
   const ext = platform === 'mt4' ? 'mq4' : 'mq5';
   const code = generator.generate({ name: bot.name, configuration: bot.configuration });
   downloadFile(code, `${bot.name.replace(/\s+/g, '_')}.${ext}`);
-  showAlert(`Downloaded ${bot.name}.${ext}`, 'success');
 }
 
-// New API functions
 async function autosaveBot(botId, config) {
   if (isAuthenticated() && backendOnline !== false) {
     try { return await fetchAPI(`/bots/${botId}/autosave`, 'POST', { configuration: config }); } catch (e) { /* silent */ }
@@ -288,7 +217,7 @@ async function autosaveBot(botId, config) {
 
 async function getVersions(botId) {
   if (isAuthenticated() && backendOnline !== false) {
-    try { return await fetchAPI(`/bots/${botId}/versions`); } catch (e) { /* fall through */ }
+    try { return (await fetchAPI(`/bots/${botId}/versions`)).versions || []; } catch (e) { /* fall through */ }
   }
   return [];
 }
@@ -342,14 +271,10 @@ async function upgradePlan(plan) {
   throw new Error('Backend unavailable');
 }
 
-async function verifyEmail(token) {
-  return await fetchAPI('/auth/verify-email/confirm', 'POST', { token });
-}
+// Clean up old localStorage keys from previous auth system
+['token', 'access_token', 'refresh_token'].forEach(k => localStorage.removeItem(k));
 
-async function resendVerification(email) {
-  return await fetchAPI('/auth/verify-email/request', 'POST', { email });
-}
-
+// Nav update
 document.addEventListener('DOMContentLoaded', async () => {
   checkBackend().then(online => {
     if (!online && isAuthenticated() && !window.location.pathname.includes('login') && !window.location.pathname.includes('register')) {
@@ -364,26 +289,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (path === 'builder.html' && typeof initBuilder === 'function') initBuilder();
   if (path === 'dashboard.html' && typeof initDashboard === 'function') initDashboard();
 
+  // Update nav
   const nav = document.querySelector('.nav-links');
-  if (nav) {
-    if (isAuthenticated()) {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const authLink = document.createElement('a');
-      authLink.href = '#';
-      authLink.textContent = user.username || 'Account';
-      authLink.style.opacity = '0.6';
-      const logoutLink = document.createElement('a');
-      logoutLink.href = '#';
-      logoutLink.textContent = 'Logout';
-      logoutLink.addEventListener('click', async (e) => {
-        e.preventDefault();
-        await signout();
-        window.location.href = 'index.html';
-      });
-      if (!document.querySelector('.nav-links a[href="login.html"]')) {
-        nav.appendChild(authLink);
-        nav.appendChild(logoutLink);
-      }
+  if (nav && isAuthenticated()) {
+    const authLink = document.createElement('a');
+    authLink.href = '#';
+    authLink.textContent = window.Clerk?.user?.username || 'Account';
+    authLink.style.opacity = '0.6';
+    const signOutLink = document.createElement('a');
+    signOutLink.href = '#';
+    signOutLink.textContent = 'Sign Out';
+    signOutLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (window.Clerk) await window.Clerk.signOut();
+      localStorage.removeItem('clerk_session');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    });
+    if (!document.querySelector('.nav-links a[href="login.html"]')) {
+      nav.appendChild(authLink);
+      nav.appendChild(signOutLink);
     }
   }
 });

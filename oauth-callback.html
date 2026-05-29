@@ -17,30 +17,33 @@
     </div>
   </div>
 
+  <script
+    data-clerk-publishable-key="pk_test_Y2xlcmsuc2hpbmluZy1iaXJkLTQyLmNsZXJrLmFjY291bnRzLmRldiQ"
+    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+    crossorigin="anonymous"
+  ></script>
   <script src="js/app.js"></script>
   <script>
-    (() => {
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
-      const error = new URLSearchParams(window.location.search).get('oauth_error');
+    (async () => {
+      try {
+        await window.Clerk.load({ publishableKey: 'pk_test_Y2xlcmsuc2hpbmluZy1iaXJkLTQyLmNsZXJrLmFjY291bnRzLmRldiQ' });
 
-      if (error) {
-        window.location.href = 'login.html?error=' + encodeURIComponent(error);
-        return;
-      }
-
-      if (accessToken) {
-        setTokens(accessToken, refreshToken);
-        fetchAPI('/auth/me', 'GET').then(data => {
-          localStorage.setItem('user', JSON.stringify(data.user));
-          window.location.href = 'dashboard.html';
-        }).catch(() => {
-          window.location.href = 'login.html?error=Session+creation+failed';
-        });
-      } else {
-        window.location.href = 'login.html?error=Authentication+failed';
+        if (window.Clerk.user) {
+          const token = await window.Clerk.session?.getToken();
+          if (token) {
+            localStorage.setItem('clerk_session', token);
+            try {
+              const userData = await syncClerkUser(token);
+              localStorage.setItem('user', JSON.stringify(userData));
+            } catch {}
+            window.location.href = 'dashboard.html';
+            return;
+          }
+        }
+        window.location.href = 'login.html';
+      } catch (err) {
+        console.error('OAuth callback error:', err);
+        window.location.href = 'login.html?error=oauth_failed';
       }
     })();
   </script>

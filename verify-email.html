@@ -30,47 +30,65 @@
 
       <div id="state-success" style="display:none">
         <div style="background:var(--bg-card);border:1px solid var(--green);border-radius:var(--radius);padding:32px;text-align:center">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" style="margin-bottom:16px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           <h2 style="color:var(--green);margin-bottom:12px">Email Verified</h2>
-          <p style="color:var(--text-muted);margin-bottom:20px;line-height:1.6">Your email has been verified. You can now sign in and start building trading bots.</p>
+          <p style="color:var(--text-muted);margin-bottom:20px">Your email has been verified. You can now sign in and start building trading bots.</p>
           <a href="login.html" class="btn btn-primary btn-md">Sign In</a>
         </div>
       </div>
 
       <div id="state-error" style="display:none">
         <div style="background:var(--bg-card);border:1px solid var(--red);border-radius:var(--radius);padding:32px;text-align:center">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" style="margin-bottom:16px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
           <h2 style="color:var(--red);margin-bottom:12px">Verification Failed</h2>
-          <p style="color:var(--text-muted);margin-bottom:20px;line-height:1.6" id="error-message">This verification link is invalid or has expired.</p>
+          <p style="color:var(--text-muted);margin-bottom:20px" id="error-message">This verification link is invalid or has expired.</p>
           <a href="login.html" class="btn btn-primary btn-md">Go to Sign In</a>
         </div>
       </div>
     </div>
   </div>
 
+  <script
+    data-clerk-publishable-key="pk_test_Y2xlcmsuc2hpbmluZy1iaXJkLTQyLmNsZXJrLmFjY291bnRzLmRldiQ"
+    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+    crossorigin="anonymous"
+    onload="initClerk()"
+  ></script>
   <script src="js/app.js"></script>
   <script>
-    (async () => {
+    let clerkReady = false;
+
+    function initClerk() {
+      window.Clerk.load({ publishableKey: 'pk_test_Y2xlcmsuc2hpbmluZy1iaXJkLTQyLmNsZXJrLmFjY291bnRzLmRldiQ' })
+        .then(() => { clerkReady = true; verifyFlow(); })
+        .catch(err => console.error('Clerk init error:', err));
+    }
+
+    async function verifyFlow() {
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
+      const clerkTicket = params.get('__clerk_ticket');
 
-      if (!token) {
-        document.getElementById('state-verifying').style.display = 'none';
-        document.getElementById('state-error').style.display = 'block';
-        document.getElementById('error-message').textContent = 'No verification token provided.';
+      if (!token && !clerkTicket) {
+        showError('No verification token provided.');
         return;
       }
 
       try {
-        await verifyEmail(token);
+        // Try Clerk client-side verification
+        if (clerkTicket && window.Clerk.client) {
+          await window.Clerk.client.signUp.attemptEmailAddressVerification({ strategy: 'email_code', code: clerkTicket });
+        }
         document.getElementById('state-verifying').style.display = 'none';
         document.getElementById('state-success').style.display = 'block';
       } catch (err) {
-        document.getElementById('state-verifying').style.display = 'none';
-        document.getElementById('state-error').style.display = 'block';
-        document.getElementById('error-message').textContent = err.message || 'Verification failed. The link may be invalid or expired.';
+        showError(err.errors?.[0]?.message || err.message || 'Verification failed. The link may be invalid or expired.');
       }
-    })();
+    }
+
+    function showError(msg) {
+      document.getElementById('state-verifying').style.display = 'none';
+      document.getElementById('state-error').style.display = 'block';
+      document.getElementById('error-message').textContent = msg;
+    }
   </script>
 </body>
 </html>
