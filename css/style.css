@@ -1333,38 +1333,74 @@ textarea { resize: vertical; min-height: 80px; }
 .empty-state h3 { font-size: 1.3rem; margin-bottom: 8px; color: var(--text); }
 .empty-state p { margin-bottom: 20px; }
 
-/* Docs */
+/* Docs Layout */
+.docs-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 28px;
+  padding: 0 0 60px;
+  align-items: start;
+}
+
+.docs-sidebar {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: sticky;
+  top: 90px;
+}
+
+.docs-sidebar .sidebar-link {
+  font-size: 0.85rem;
+  padding: 8px 10px;
+}
+
+.docs-main {
+  min-width: 0;
+}
+
+/* Docs Content */
 .docs-content {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px 0 60px;
+  padding: 0 0 40px;
 }
 
 .docs-content h2 {
   font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 700;
-  margin-top: 40px;
-  margin-bottom: 12px;
+  margin-top: 48px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.docs-content h2:first-child {
+  margin-top: 0;
 }
 
 .docs-content h3 {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 600;
   margin-top: 28px;
   margin-bottom: 8px;
+  color: var(--text);
+}
+
+.docs-content h3 + p {
+  margin-top: 0;
 }
 
 .docs-content p {
   color: var(--text-muted);
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   line-height: 1.7;
 }
 
 .docs-content ul, .docs-content ol {
   color: var(--text-muted);
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   padding-left: 24px;
 }
 
@@ -1372,7 +1408,7 @@ textarea { resize: vertical; min-height: 80px; }
 
 .docs-content code {
   background: var(--bg);
-  padding: 2px 6px;
+  padding: 2px 8px;
   border-radius: 4px;
   font-size: 0.85rem;
   font-family: var(--font-mono);
@@ -1392,6 +1428,127 @@ textarea { resize: vertical; min-height: 80px; }
   background: none;
   padding: 0;
   color: var(--text);
+}
+
+.docs-content kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.docs-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 40px 0;
+}
+
+/* Install Steps */
+.install-step {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+
+.install-step:hover {
+  border-color: var(--accent);
+}
+
+.install-step-num {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+}
+
+.install-step-body {
+  flex: 1;
+}
+
+.install-step-body h3 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: var(--text);
+}
+
+.install-step-body p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.install-tip {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(0, 224, 255, 0.06);
+  border: 1px solid rgba(0, 224, 255, 0.15);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.install-tip strong {
+  color: var(--accent);
+}
+
+.install-warning {
+  margin-top: 16px;
+  margin-bottom: 24px;
+  padding: 14px 18px;
+  background: rgba(255, 59, 59, 0.06);
+  border: 1px solid rgba(255, 59, 59, 0.15);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: var(--red);
+  line-height: 1.6;
+}
+
+.install-warning strong {
+  color: var(--red);
+}
+
+/* Troubleshooting */
+.troubleshoot-item {
+  margin-bottom: 16px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.troubleshoot-item h3 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--text);
+}
+
+.troubleshoot-item p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.6;
 }
 
 /* Platform selector in builder header */
@@ -1485,6 +1642,8 @@ textarea { resize: vertical; min-height: 80px; }
   .pricing-grid { grid-template-columns: 1fr; }
   .pricing-card-featured { transform: none; }
   .testimonials-grid { grid-template-columns: 1fr; }
+  .docs-layout { grid-template-columns: 1fr; }
+  .docs-sidebar { display: none; }
   .dashboard-layout { grid-template-columns: 1fr; }
   .dashboard-sidebar { display: none; }
   .builder-layout { grid-template-columns: 1fr; }

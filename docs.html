@@ -22,107 +22,308 @@
   </nav>
 
   <div class="container">
-    <div class="page-header">
-      <h1>Documentation</h1>
-      <p>How to create, download, and install your trading bots.</p>
-    </div>
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <div class="sidebar-section">
+          <h3 class="sidebar-heading">Getting Started</h3>
+          <nav class="sidebar-nav">
+            <a href="#overview" class="sidebar-link active">Overview</a>
+            <a href="#create-bot" class="sidebar-link">Creating a Bot</a>
+            <a href="#strategies" class="sidebar-link">Strategies</a>
+          </nav>
+        </div>
+        <div class="sidebar-section">
+          <h3 class="sidebar-heading">Installation</h3>
+          <nav class="sidebar-nav">
+            <a href="#install-mt4" class="sidebar-link">MetaTrader 4</a>
+            <a href="#install-mt5" class="sidebar-link">MetaTrader 5</a>
+            <a href="#compile" class="sidebar-link">Compiling Code</a>
+            <a href="#enable-autotrade" class="sidebar-link">Enable AutoTrading</a>
+          </nav>
+        </div>
+        <div class="sidebar-section">
+          <h3 class="sidebar-heading">Troubleshooting</h3>
+          <nav class="sidebar-nav">
+            <a href="#troubleshoot" class="sidebar-link">Common Issues</a>
+            <a href="#important" class="sidebar-link">Important Notes</a>
+            <a href="#faq" class="sidebar-link">FAQ</a>
+          </nav>
+        </div>
+      </aside>
 
-    <div class="docs-content">
+      <main class="docs-main">
+        <div class="page-header">
+          <h1>Documentation</h1>
+          <p>How to create, download, and install your trading bots.</p>
+        </div>
 
-      <h2>What is VANTIS AI?</h2>
-      <p>VANTIS AI is a next-generation platform that lets you create AI-powered MetaTrader Expert Advisors (EAs) without any coding. Configure your strategy through an intuitive builder, describe your idea to the AI assistant, and we generate the MQL4 (.mq4) or MQL5 (.mq5) code for you. No subscriptions, no limits.</p>
+        <div class="docs-content">
 
-      <h2>How to Create a Bot</h2>
-      <ol>
-        <li>Go to the <a href="builder.html">Bot Builder</a> page.</li>
-        <li>Give your bot a name (and optional description).</li>
-        <li>Choose a strategy: Grid, Martingale, Hedging, Trend Following, or Scalping.</li>
-        <li>Configure money management (risk per trade, lot size, daily limits).</li>
-        <li>Set trade management (stop loss, take profit, trailing stop).</li>
-        <li>Define entry rules (buy/sell signals, trend filter, timeframe).</li>
-        <li>Choose MT4 (.mq4) or MT5 (.mq5) format.</li>
-        <li>Click <strong>Save &amp; Download</strong>.</li>
-      </ol>
+          <h2 id="overview">What is VANTIS AI?</h2>
+          <p>VANTIS AI is a next-generation platform that lets you create AI-powered MetaTrader Expert Advisors (EAs) without any coding. Configure your strategy through an intuitive builder, describe your idea to the AI assistant, and we generate the MQL4 (.mq4) or MQL5 (.mq5) code for you. No subscriptions, no limits.</p>
 
-      <h2>Supported Strategies</h2>
+          <h2 id="create-bot">How to Create a Bot</h2>
+          <ol>
+            <li>Go to the <a href="builder.html">Bot Builder</a> page.</li>
+            <li>Give your bot a name and optional description.</li>
+            <li>Choose a strategy: Grid, Martingale, Hedging, Trend Following, or Scalping.</li>
+            <li>Configure money management (risk per trade, lot size, daily limits).</li>
+            <li>Set trade management (stop loss, take profit, trailing stop).</li>
+            <li>Define entry rules (buy/sell signals, trend filter, timeframe).</li>
+            <li>Choose MT4 (.mq4) or MT5 (.mq5) format.</li>
+            <li>Click <strong>Save &amp; Download</strong>.</li>
+          </ol>
 
-      <h3>Grid Trading</h3>
-      <p>Places buy and sell orders at predefined price intervals. Ideal for range-bound markets. Configure grid size, number of levels, and step distance.</p>
+          <h2 id="strategies">Supported Strategies</h2>
 
-      <h3>Martingale</h3>
-      <p>An aggressive recovery strategy that doubles the lot size after each losing trade. Configure the multiplier factor. Higher risk, higher potential recovery.</p>
+          <h3>Grid Trading</h3>
+          <p>Places buy and sell orders at predefined price intervals. Ideal for range-bound markets. Configure grid size, number of levels, and step distance.</p>
 
-      <h3>Hedging</h3>
-      <p>Opens opposing positions to offset risk. Automatically places a hedge trade when a position moves against you. Useful for volatile markets.</p>
+          <h3>Martingale</h3>
+          <p>An aggressive recovery strategy that doubles the lot size after each losing trade. Configure the multiplier factor. Higher risk, higher potential recovery.</p>
 
-      <h3>Trend Following</h3>
-      <p>Trades in the direction of the trend using Moving Average crossovers. Enters on trend confirmation and exits on reversal signals.</p>
+          <h3>Hedging</h3>
+          <p>Opens opposing positions to offset risk. Automatically places a hedge trade when a position moves against you. Useful for volatile markets.</p>
 
-      <h3>Scalping</h3>
-      <p>Opens multiple small trades for quick profits using RSI-based entry signals. Designed for M5 timeframe with tight stop losses.</p>
+          <h3>Trend Following</h3>
+          <p>Trades in the direction of the trend using Moving Average crossovers. Enters on trend confirmation and exits on reversal signals.</p>
 
-      <h2>How to Install on MetaTrader 4</h2>
-      <ol>
-        <li>Open MetaTrader 4.</li>
-        <li>Click <strong>File</strong> &gt; <strong>Open Data Folder</strong>.</li>
-        <li>Navigate to <code>MQL4</code> &gt; <code>Experts</code>.</li>
-        <li>Copy the downloaded <code>.mq4</code> file into the <code>Experts</code> folder.</li>
-        <li>Restart MetaTrader 4 or right-click in Navigator and select <strong>Refresh</strong>.</li>
-        <li>Drag your EA from <strong>Navigator</strong> &gt; <strong>Expert Advisors</strong> onto a chart.</li>
-        <li>Enable <strong>Automated Trading</strong> (AutoTrading button) and adjust input parameters as needed.</li>
-      </ol>
+          <h3>Scalping</h3>
+          <p>Opens multiple small trades for quick profits using RSI-based entry signals. Designed for M5 timeframe with tight stop losses.</p>
 
-      <h2>How to Install on MetaTrader 5</h2>
-      <ol>
-        <li>Open MetaTrader 5.</li>
-        <li>Click <strong>File</strong> &gt; <strong>Open Data Folder</strong>.</li>
-        <li>Navigate to <code>MQL5</code> &gt; <code>Experts</code>.</li>
-        <li>Copy the downloaded <code>.mq5</code> file into the <code>Experts</code> folder.</li>
-        <li>Restart MetaTrader 5 or right-click in Navigator and select <strong>Refresh</strong>.</li>
-        <li>Drag your EA from <strong>Navigator</strong> &gt; <strong>Expert Advisors</strong> onto a chart.</li>
-        <li>Enable <strong>Automated Trading</strong> and configure input parameters.</li>
-      </ol>
+          <hr>
 
-      <h2>Compiling Generated Code</h2>
-      <p>The downloaded <code>.mq4</code> / <code>.mq5</code> files are source code. MetaTrader needs to compile them into <code>.ex4</code> / <code>.ex5</code> before they can run. Here's how:</p>
-      <ol>
-        <li>After copying the file into the <code>Experts</code> folder, open MetaTrader.</li>
-        <li>Press <strong>F4</strong> to open MetaEditor.</li>
-        <li>In MetaEditor, open the file from <strong>File</strong> &gt; <strong>Open</strong>.</li>
-        <li>Click <strong>Compile</strong> (or press F7).</li>
-        <li>If successful, a compiled <code>.ex4</code> / <code>.ex5</code> file will appear in the <code>Experts</code> folder.</li>
-        <li>If there are compilation errors, check the error log and adjust the inputs.</li>
-      </ol>
+          <h2 id="install-mt4">How to Install on MetaTrader 4 (MT4)</h2>
+          <p>Follow these steps to install your generated .mq4 bot on MetaTrader 4:</p>
 
-      <h2>Important Notes</h2>
-      <ul>
-        <li>VANTIS AI is a <strong>technical tool</strong> — it generates trading code. It is not a broker and does not handle funds.</li>
-        <li>Always test generated EAs on a <strong>demo account</strong> before using real money.</li>
-        <li>Trading involves risk. Past performance does not guarantee future results.</li>
-        <li>Generated code is provided as-is. Customize input parameters in MetaTrader after attaching to a chart.</li>
-        <li>Your bots are saved in your browser's local storage. Clearing your browser data will delete them.</li>
-      </ul>
+          <div class="install-step">
+            <div class="install-step-num">1</div>
+            <div class="install-step-body">
+              <h3>Open MetaTrader 4</h3>
+              <p>Launch MT4 on your computer. Make sure you are logged into your trading account.</p>
+            </div>
+          </div>
 
-      <h2>FAQ</h2>
+          <div class="install-step">
+            <div class="install-step-num">2</div>
+            <div class="install-step-body">
+              <h3>Open the Data Folder</h3>
+              <p>Click <strong>File</strong> &gt; <strong>Open Data Folder</strong>. This opens the MT4 installation directory in your file explorer.</p>
+              <div class="install-tip">
+                <strong>Tip:</strong> If you cannot find the <strong>File</strong> menu, press <kbd>F4</kbd> to open MetaEditor, then click <strong>File</strong> &gt; <strong>Open Data Folder</strong> from there.
+              </div>
+            </div>
+          </div>
 
-      <h3>Is this really free?</h3>
-      <p>Yes. No subscriptions, no hidden fees. Create unlimited bots.</p>
+          <div class="install-step">
+            <div class="install-step-num">3</div>
+            <div class="install-step-body">
+              <h3>Navigate to the Experts Folder</h3>
+              <p>In the data folder, browse to: <code>MQL4 &gt; Experts</code> (full path: <code>%APPDATA%\MetaTrader 4\MQL4\Experts\</code>)</p>
+            </div>
+          </div>
 
-      <h3>Can I edit a saved bot?</h3>
-      <p>Yes. Go to <a href="dashboard.html">My Bots</a> and click <strong>Edit</strong> on any bot.</p>
+          <div class="install-step">
+            <div class="install-step-num">4</div>
+            <div class="install-step-body">
+              <h3>Copy the .mq4 File</h3>
+              <p>Copy the <code>.mq4</code> file you downloaded from VANTIS AI into the <code>Experts</code> folder.</p>
+            </div>
+          </div>
 
-      <h3>Where are my bots stored?</h3>
-      <p>In your browser's localStorage. They're only accessible from this browser/device. We recommend downloading the code files for safekeeping.</p>
+          <div class="install-step">
+            <div class="install-step-num">5</div>
+            <div class="install-step-body">
+              <h3>Refresh MetaTrader</h3>
+              <p>In MT4, right-click in the <strong>Navigator</strong> panel (View &gt; Navigator if hidden) and select <strong>Refresh</strong>. Your bot will appear under <strong>Expert Advisors</strong>.</p>
+              <div class="install-tip">
+                <strong>Tip:</strong> If it still doesn't appear, restart MT4 completely.
+              </div>
+            </div>
+          </div>
 
-      <h3>Do I need coding skills?</h3>
-      <p>No. The builder generates all the code for you.</p>
+          <div class="install-step">
+            <div class="install-step-num">6</div>
+            <div class="install-step-body">
+              <h3>Attach to a Chart</h3>
+              <p>Drag the EA from <strong>Navigator &gt; Expert Advisors</strong> onto any chart. The EA settings dialog will open — configure inputs as needed and click <strong>OK</strong>.</p>
+            </div>
+          </div>
 
-      <h3>Which MetaTrader versions are supported?</h3>
-      <p>Both MT4 (MQL4) and MT5 (MQL5) are supported. Choose your platform before downloading.</p>
+          <div class="install-step">
+            <div class="install-step-num">7</div>
+            <div class="install-step-body">
+              <h3>Enable Automated Trading</h3>
+              <p>Make sure the <strong>AutoTrading</strong> button (top toolbar, usually with a play icon) is green/active. Also check that AutoTrading is enabled globally in <strong>Tools &gt; Options &gt; Expert Advisors &gt; Allow Automated Trading</strong>.</p>
+            </div>
+          </div>
 
+          <h2 id="install-mt5">How to Install on MetaTrader 5 (MT5)</h2>
+          <p>Follow these steps to install your generated .mq5 bot on MetaTrader 5:</p>
+
+          <div class="install-step">
+            <div class="install-step-num">1</div>
+            <div class="install-step-body">
+              <h3>Open MetaTrader 5</h3>
+              <p>Launch MT5 and log into your trading account.</p>
+            </div>
+          </div>
+
+          <div class="install-step">
+            <div class="install-step-num">2</div>
+            <div class="install-step-body">
+              <h3>Open the Data Folder</h3>
+              <p>Click <strong>File</strong> &gt; <strong>Open Data Folder</strong> to open the MT5 directory.</p>
+            </div>
+          </div>
+
+          <div class="install-step">
+            <div class="install-step-num">3</div>
+            <div class="install-step-body">
+              <h3>Navigate to the Experts Folder</h3>
+              <p>Browse to: <code>MQL5 &gt; Experts</code> (full path: <code>%APPDATA%\MetaTrader 5\MQL5\Experts\</code>)</p>
+            </div>
+          </div>
+
+          <div class="install-step">
+            <div class="install-step-num">4</div>
+            <div class="install-step-body">
+              <h3>Copy the .mq5 File</h3>
+              <p>Copy the <code>.mq5</code> file into the <code>Experts</code> folder.</p>
+            </div>
+          </div>
+
+          <div class="install-step">
+            <div class="install-step-num">5</div>
+            <div class="install-step-body">
+              <h3>Refresh MetaTrader</h3>
+              <p>Right-click in the Navigator panel and select <strong>Refresh</strong>. The bot appears under <strong>Expert Advisors</strong>.</p>
+            </div>
+          </div>
+
+          <div class="install-step">
+            <div class="install-step-num">6</div>
+            <div class="install-step-body">
+              <h3>Attach and Activate</h3>
+              <p>Drag onto a chart, configure inputs, and ensure the AutoTrading button is enabled.</p>
+            </div>
+          </div>
+
+          <h2 id="compile">Compiling Generated Code</h2>
+          <p>The downloaded <code>.mq4</code> / <code>.mq5</code> files are source code. MetaTrader needs to compile them into <code>.ex4</code> / <code>.ex5</code> before they can run. This usually happens automatically when you attach the EA, but you can compile manually:</p>
+          <ol>
+            <li>After copying the file into the <code>Experts</code> folder, open MetaTrader.</li>
+            <li>Press <strong>F4</strong> to open MetaEditor.</li>
+            <li>In MetaEditor, open the file from <strong>File</strong> &gt; <strong>Open</strong> (navigate to the Experts folder).</li>
+            <li>Click <strong>Compile</strong> (or press <kbd>F7</kbd>).</li>
+            <li>The compiler output panel shows success or errors. A green checkmark means the .ex4/.ex5 was generated.</li>
+            <li>If there are compilation errors, check the error message, adjust your bot settings, regenerate, and try again.</li>
+          </ol>
+
+          <h2 id="enable-autotrade">How to Enable AutoTrading</h2>
+          <p>For your EA to execute trades automatically, AutoTrading must be enabled at multiple levels:</p>
+          <ol>
+            <li><strong>Global setting:</strong> <strong>Tools &gt; Options &gt; Expert Advisors</strong> — check <strong>"Allow Automated Trading"</strong> and <strong>"Allow DLL imports"</strong> (if required by the EA).</li>
+            <li><strong>Chart level:</strong> After attaching the EA, click the <strong>AutoTrading</strong> button on the toolbar (it should turn green).</li>
+            <li><strong>EA level:</strong> In the EA settings dialog (drag onto chart), ensure the <strong>"Allow Automated Trading"</strong> checkbox is checked on the <strong>"Common"</strong> tab.</li>
+            <li><strong>Algo Trading button:</strong> In MT5, there is an <strong>"Algo Trading"</strong> button — ensure it is active (not crossed out).</li>
+          </ol>
+          <div class="install-warning">
+            <strong>Important:</strong> If any of these levels has AutoTrading disabled, your EA will be attached to the chart but will <strong>not</strong> place any trades. A smiley face icon on the top-right of the chart means the EA is active; a sad face means it is not.
+          </div>
+
+          <h2 id="troubleshoot">Troubleshooting — Common Issues</h2>
+
+          <div class="troubleshoot-item">
+            <h3>EA not showing in Navigator</h3>
+            <p>Refresh the Navigator (right-click &gt; Refresh). If it still doesn't appear, restart MT4/MT5. Make sure the file is in the correct <code>Experts</code> folder with the right extension (.mq4 for MT4, .mq5 for MT5).</p>
+          </div>
+
+          <div class="troubleshoot-item">
+            <h3>Sad face icon on chart (EA not running)</h3>
+            <p>The EA is attached but cannot trade. Check: (1) AutoTrading is enabled in Tools &gt; Options, (2) the AutoTrading button on the toolbar is green, (3) your account is a real or demo account (not "Investor" read-only mode).</p>
+          </div>
+
+          <div class="troubleshoot-item">
+            <h3>Compilation errors</h3>
+            <p>Open MetaEditor (F4), open the .mq4/.mq5 file, and compile (F7). The errors panel shows what's wrong. Common causes: missing curly braces, semicolons, or type mismatches. If errors persist, regenerate the bot with a simpler configuration.</p>
+          </div>
+
+          <div class="troubleshoot-item">
+            <h3>"Expert Advisor cannot be tested" error</h3>
+            <p>This usually means the EA uses features not supported in the Strategy Tester. Try testing the EA on a demo account instead by attaching it to a live chart.</p>
+          </div>
+
+          <div class="troubleshoot-item">
+            <h3>"No history data" in Strategy Tester</h3>
+            <p>Download historical data first: In MT4/MT5, open <strong>Tools &gt; History Center</strong>, select your symbol and timeframe, click <strong>Download</strong>. Once complete, try the backtest again.</p>
+          </div>
+
+          <div class="troubleshoot-item">
+            <h3>EA not opening trades</h3>
+            <p>Verify: (1) Your trading account has sufficient margin, (2) the trade conditions are being met (check the Experts tab in the Terminal panel for log messages), (3) it's during the correct trading session for your symbol, (4) no trading holidays.</p>
+          </div>
+
+          <h2 id="important">Important Notes</h2>
+          <ul>
+            <li>VANTIS AI is a <strong>technical tool</strong> — it generates trading code. It is not a broker and does not handle funds.</li>
+            <li>Always test generated EAs on a <strong>demo account</strong> before using real money.</li>
+            <li>Trading involves risk. Past performance does not guarantee future results.</li>
+            <li>Generated code is provided as-is. Customize input parameters in MetaTrader after attaching to a chart.</li>
+            <li>Your bots are saved in your browser's local storage. Clearing your browser data will delete them.</li>
+          </ul>
+
+          <h2 id="faq">FAQ</h2>
+
+          <h3>Is this really free?</h3>
+          <p>Yes. No subscriptions, no hidden fees. Create unlimited bots.</p>
+
+          <h3>Can I edit a saved bot?</h3>
+          <p>Yes. Go to <a href="dashboard.html">My Bots</a> and click <strong>Edit</strong> on any bot.</p>
+
+          <h3>Where are my bots stored?</h3>
+          <p>In your browser's localStorage. They're only accessible from this browser/device. We recommend downloading the code files for safekeeping.</p>
+
+          <h3>Do I need coding skills?</h3>
+          <p>No. The builder generates all the code for you.</p>
+
+          <h3>Which MetaTrader versions are supported?</h3>
+          <p>Both MT4 (MQL4) and MT5 (MQL5) are supported. Choose your platform before downloading.</p>
+
+          <h3>Why does the EA have a sad face on the chart?</h3>
+          <p>See the troubleshooting section above. Usually it means AutoTrading is disabled at some level (global, chart, or account).</p>
+
+          <h3>Can I use the bot on multiple charts?</h3>
+          <p>Yes. You can attach the same EA to multiple charts (different symbols or timeframes). Each chart runs an independent instance. Note that money management and position tracking may overlap — test thoroughly.</p>
+
+        </div>
+      </main>
     </div>
   </div>
 
   <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.docs-sidebar .sidebar-link');
+      const sections = [];
+      links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          const el = document.getElementById(href.slice(1));
+          if (el) sections.push({ el, link });
+        }
+      });
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            links.forEach(l => l.classList.remove('active'));
+            const match = sections.find(s => s.el === entry.target);
+            if (match) match.link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-80px 0px -60% 0px' });
+      sections.forEach(s => observer.observe(s.el));
+    });
+  </script>
 </body>
 </html>
