@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signing in... - VANTIS AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container" style="display:flex;align-items:center;justify-content:center;min-height:100vh">
+    <div style="text-align:center">
+      <h2 style="margin-bottom:12px">Signing you in...</h2>
+      <p style="color:var(--text-muted)">Please wait while we complete your authentication.</p>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    (() => {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      const error = new URLSearchParams(window.location.search).get('oauth_error');
+
+      if (error) {
+        window.location.href = 'login.html?error=' + encodeURIComponent(error);
+        return;
+      }
+
+      if (accessToken) {
+        setTokens(accessToken, refreshToken);
+        fetchAPI('/auth/me', 'GET').then(data => {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          window.location.href = 'dashboard.html';
+        }).catch(() => {
+          window.location.href = 'login.html?error=Session+creation+failed';
+        });
+      } else {
+        window.location.href = 'login.html?error=Authentication+failed';
+      }
+    })();
+  </script>
+</body>
+</html>
