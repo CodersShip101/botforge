@@ -2,8 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 
+const { clerkMiddleware } = require('@clerk/express');
 const db = require('./config/database');
 const botRoutes = require('./routes/bots');
 const { clerkAuth, clerkClient } = require('./middleware/clerk');
@@ -14,6 +15,9 @@ const app = express();
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
+
+// Clerk middleware verifies session tokens from Authorization header
+app.use(clerkMiddleware());
 
 // Serve frontend files (parent directory)
 app.use(express.static(path.join(__dirname, '..')));

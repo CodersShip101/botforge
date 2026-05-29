@@ -18,7 +18,7 @@
   </div>
 
   <script
-    data-clerk-publishable-key="pk_test_Y2xlcmsuc2hpbmluZy1iaXJkLTQyLmNsZXJrLmFjY291bnRzLmRldiQ"
+    data-clerk-publishable-key="pk_test_cmVzdGVkLWhhcmUtMzUuY2xlcmsuYWNjb3VudHMuZGV2JA"
     src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
     crossorigin="anonymous"
   ></script>
@@ -26,7 +26,7 @@
   <script>
     (async () => {
       try {
-        await window.Clerk.load({ publishableKey: 'pk_test_Y2xlcmsuc2hpbmluZy1iaXJkLTQyLmNsZXJrLmFjY291bnRzLmRldiQ' });
+        await window.Clerk.load({ publishableKey: 'pk_test_cmVzdGVkLWhhcmUtMzUuY2xlcmsuYWNjb3VudHMuZGV2JA' });
 
         if (window.Clerk.user) {
           const token = await window.Clerk.session?.getToken();

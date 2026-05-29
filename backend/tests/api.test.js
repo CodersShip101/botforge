@@ -21,6 +21,30 @@ jest.mock('@clerk/backend', () => ({
   verifyToken: jest.fn(() => Promise.resolve({ sub: 'test_clerk_user_123', sid: 'test_session' }))
 }));
 
+// Mock @clerk/express so clerkMiddleware() sets req.auth and passes through
+jest.mock('@clerk/express', () => ({
+  clerkMiddleware: jest.fn(() => (req, res, next) => {
+    if (req.headers?.authorization?.startsWith('Bearer ')) {
+      req.auth = { userId: 'test_clerk_user_123', sessionId: 'test_session' };
+    }
+    next();
+  }),
+  getAuth: jest.fn((req) => req.auth || {}),
+  requireAuth: jest.fn(() => (req, res, next) => next()),
+  clerkClient: {
+    users: {
+      getUser: jest.fn(() => Promise.resolve({
+        emailAddresses: [{ emailAddress: 'test-user@test.com' }],
+        username: 'testuser'
+      })),
+      getUserSessionList: jest.fn(() => Promise.resolve([]))
+    },
+    sessions: {
+      revoke: jest.fn(() => Promise.resolve())
+    }
+  }
+}));
+
 const app = require('../server');
 
 let testToken = 'mock_jwt_token_xyz';
