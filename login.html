@@ -102,19 +102,17 @@
     async function clerkOAuth(strategy) {
       if (!clerkReady) { return initClerk().then(() => clerkOAuth(strategy)); }
       try {
+        const origOpen = window.open;
+        window.open = function(url, target, features) {
+          window.open = origOpen;
+          window.location.href = url;
+          return null;
+        };
         await window.Clerk.client.signIn.authenticateWithRedirect({
           strategy,
-          redirectUrl: window.location.origin + '/oauth-callback.html',
-          redirectUrlComplete: window.location.origin + '/oauth-callback.html'
+          redirectUrl: window.location.origin + '/oauth-callback.html'
         });
-        if (window.Clerk.user) {
-          const token = await window.Clerk.session?.getToken();
-          if (token) {
-            localStorage.setItem('clerk_session', token);
-            try { await syncClerkUser(token); } catch {}
-          }
-          window.location.href = 'dashboard.html';
-        }
+        window.open = origOpen;
       } catch (err) {
         setAlert('Social sign in failed: ' + (err.message || 'Unknown error'), 'error');
       }
