@@ -107,17 +107,11 @@
     async function clerkOAuth(strategy) {
       if (!clerkReady) { return initClerk().then(() => clerkOAuth(strategy)); }
       try {
-        const origOpen = window.open;
-        window.open = function(url, target, features) {
-          window.open = origOpen;
-          window.location.href = url;
-          return null;
-        };
-        await window.Clerk.client.signUp.authenticateWithRedirect({
-          strategy,
-          redirectUrl: window.location.origin + '/oauth-callback.html'
+        const params = new URLSearchParams({
+          strategy: strategy,
+          redirect_url: window.location.origin + '/oauth-callback.html'
         });
-        window.open = origOpen;
+        window.location.href = 'https://rested-hare-35.accounts.dev/sign-up?' + params.toString();
       } catch (err) {
         setAlert('Social sign up failed: ' + (err.message || 'Unknown error'), 'error');
       }
