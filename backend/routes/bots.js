@@ -9,5 +9,6 @@ router.get('/:botId', botController.getBot);
 router.put('/:botId', botController.updateBot);
 router.delete('/:botId', botController.deleteBot);
 router.get('/:botId/download', botController.downloadBot);
+router.post('/:botId/generate-code', botController.generateCode);
 
 module.exports = router;

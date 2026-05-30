@@ -4,18 +4,24 @@ const backtestEngine = require('../services/backtestEngine');
 exports.runBacktest = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { botId, symbol, timeframe, dateStart, dateEnd } = req.body;
+    const { botId, configuration: configOverride, symbol, timeframe, days } = req.body;
 
     if (!botId) return res.status(400).json({ error: 'botId is required' });
 
     const bot = db.prepare('SELECT * FROM bots WHERE id = ? AND user_id = ?').get(botId, userId);
     if (!bot) return res.status(404).json({ error: 'Bot not found' });
 
-    const cfg = JSON.parse(bot.configuration);
+    // Allow config override from request body
+    const cfg = configOverride || JSON.parse(bot.configuration);
+
+    const now = new Date();
+    const backtestDays = days || 150;
+    const dateEnd = now.toISOString().split('T')[0];
+    const dateStart = new Date(now.getTime() - backtestDays * 86400000).toISOString().split('T')[0];
 
     const bt = db.prepare(
       'INSERT INTO backtests (user_id, bot_id, symbol, timeframe, date_start, date_end, status) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).run(userId, botId, symbol || 'EURUSD', timeframe || 'H1', dateStart || '2025-01-01', dateEnd || '2025-06-01', 'running');
+    ).run(userId, botId, symbol || cfg.symbol || 'EURUSD', timeframe || cfg.timeFrame || cfg.timeframe || 'H1', dateStart, dateEnd, 'running');
 
     const backtestId = bt.lastInsertRowid;
 

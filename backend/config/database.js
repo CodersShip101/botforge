@@ -187,8 +187,21 @@ async function init() {
   addCol('users', 'password_last_changed DATETIME');
   addCol('users', 'last_2fa_update DATETIME');
   addCol('bots', "status TEXT NOT NULL DEFAULT 'draft'");
+  addCol('bots', "symbol TEXT NOT NULL DEFAULT 'EURUSD'");
+  addCol('bots', "timeframe TEXT NOT NULL DEFAULT 'H1'");
+  addCol('bots', "platform TEXT NOT NULL DEFAULT 'MT4'");
+  addCol('bot_versions', 'version_label TEXT DEFAULT \'\'');
+  addCol('bot_versions', 'notes TEXT DEFAULT \'\'');
 
   sqlDb.exec(`
+    CREATE TABLE IF NOT EXISTS ai_generations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      prompt TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_ai_generations_user_id ON ai_generations(user_id);
+
     CREATE TABLE IF NOT EXISTS api_keys (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

@@ -246,16 +246,16 @@ async function runAIGenerate() {
 
   try {
     const data = await generateStrategy(prompt, market, risk);
-    builderState.config = data.configuration;
+    builderState.config = data.config || data.configuration;
     resultDiv.innerHTML = `
       <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px">
         <h4 style="margin-bottom:8px;color:var(--accent)">Strategy Generated</h4>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:0.85rem;color:var(--text-muted);margin-bottom:8px">
-          <div><strong>Type:</strong> ${capitalize(data.configuration.strategy)}</div>
-          <div><strong>Risk:</strong> ${capitalize(data.riskProfile)}</div>
-          <div><strong>Market:</strong> ${capitalize(data.market)}</div>
+          <div><strong>Type:</strong> ${capitalize((data.config || data.configuration).strategy)}</div>
+          <div><strong>Risk:</strong> ${capitalize(data.riskProfile || data.risk || 'moderate')}</div>
+          <div><strong>Market:</strong> ${capitalize(data.market || 'forex')}</div>
         </div>
-        <p style="color:var(--text);font-size:0.9rem;margin-bottom:12px">${data.explanation}</p>
+        <p style="color:var(--text);font-size:0.9rem;margin-bottom:12px">${data.summary || data.explanation || ''}</p>
         <button class="btn btn-primary btn-sm" onclick="closeAIModal();renderStrategy()">Apply & Close</button>
       </div>
     `;

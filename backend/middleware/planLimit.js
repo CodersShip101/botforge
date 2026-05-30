@@ -1,9 +1,9 @@
 const db = require('../config/database');
 
 const PLAN_LIMITS = {
-  free: { maxBots: 1, maxBacktestsPerDay: 3, aiGenerator: false, advancedBacktesting: false },
-  pro: { maxBots: 999, maxBacktestsPerDay: 50, aiGenerator: true, advancedBacktesting: true },
-  elite: { maxBots: 9999, maxBacktestsPerDay: 200, aiGenerator: true, advancedBacktesting: true }
+  free: { bots: 1, backtests: 3, ai_generate: 0 },
+  pro: { bots: 999, backtests: 50, ai_generate: 20 },
+  elite: { bots: 9999, backtests: 200, ai_generate: 100 }
 };
 
 function getUserPlan(userId) {
@@ -11,54 +11,48 @@ function getUserPlan(userId) {
   return (user && user.plan) || 'free';
 }
 
-function checkBotLimit(req, res, next) {
-  const userId = req.user.userId;
-  const plan = getUserPlan(userId);
-  const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
-
-  const count = db.prepare('SELECT COUNT(*) AS cnt FROM bots WHERE user_id = ?').get(userId);
-  if (count.cnt >= limits.maxBots) {
-    return res.status(403).json({
-      error: `Plan limit reached. You can have up to ${limits.maxBots} bot(s) on the ${plan} plan. Upgrade to create more.`
-    });
+function getUsage(userId, type) {
+  if (type === 'bots') {
+    return db.prepare('SELECT COUNT(*) AS cnt FROM bots WHERE user_id = ?').get(userId).cnt;
   }
-  next();
+  if (type === 'backtests') {
+    return db.prepare("SELECT COUNT(*) AS cnt FROM backtests WHERE user_id = ? AND date(created_at) = date('now')").get(userId).cnt;
+  }
+  if (type === 'ai_generate') {
+    return db.prepare("SELECT COUNT(*) AS cnt FROM ai_generations WHERE user_id = ? AND date(created_at) = date('now')").get(userId)?.cnt || 0;
+  }
+  return 0;
 }
 
-function checkBacktestLimit(req, res, next) {
-  const userId = req.user.userId;
-  const plan = getUserPlan(userId);
-  const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+function planLimit(type) {
+  return (req, res, next) => {
+    const userId = req.user.userId;
+    const plan = getUserPlan(userId);
+    const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+    const limit = limits[type];
+    if (limit === undefined) return next();
 
-  const today = db.prepare(
-    "SELECT COUNT(*) AS cnt FROM backtests WHERE user_id = ? AND date(created_at) = date('now')"
-  ).get(userId);
-  if (today.cnt >= limits.maxBacktestsPerDay) {
-    return res.status(403).json({
-      error: `Daily backtest limit reached. You can run up to ${limits.maxBacktestsPerDay} backtest(s) per day on the ${plan} plan.`
-    });
-  }
-  next();
+    if (limit === 0) {
+      return res.status(403).json({
+        error: `${type === 'ai_generate' ? 'AI Strategy Generator' : 'This feature'} is not available on the ${plan} plan. Upgrade to Pro or Elite.`
+      });
+    }
+
+    const usage = getUsage(userId, type);
+    if (usage >= limit) {
+      const labels = { bots: 'bots', backtests: 'daily backtests', ai_generate: 'AI generations today' };
+      return res.status(403).json({
+        error: `Plan limit reached. You have used ${usage}/${limit} ${labels[type] || 'units'} on the ${plan} plan. Upgrade for more.`
+      });
+    }
+    next();
+  };
 }
 
-function requireAIGenerator(req, res, next) {
-  const userId = req.user.userId;
-  const plan = getUserPlan(userId);
-  const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
-  if (!limits.aiGenerator) {
-    return res.status(403).json({ error: 'AI Strategy Generator is available on Pro and Elite plans.' });
-  }
-  next();
-}
+// Legacy middleware functions
+function checkBotLimit(req, res, next) { return planLimit('bots')(req, res, next); }
+function checkBacktestLimit(req, res, next) { return planLimit('backtests')(req, res, next); }
+function requireAIGenerator(req, res, next) { return planLimit('ai_generate')(req, res, next); }
+function requireAdvancedBacktesting(req, res, next) { return planLimit('backtests')(req, res, next); }
 
-function requireAdvancedBacktesting(req, res, next) {
-  const userId = req.user.userId;
-  const plan = getUserPlan(userId);
-  const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
-  if (!limits.advancedBacktesting) {
-    return res.status(403).json({ error: 'Advanced backtesting is available on Pro and Elite plans.' });
-  }
-  next();
-}
-
-module.exports = { PLAN_LIMITS, getUserPlan, checkBotLimit, checkBacktestLimit, requireAIGenerator, requireAdvancedBacktesting };
+module.exports = { PLAN_LIMITS, getUserPlan, planLimit, checkBotLimit, checkBacktestLimit, requireAIGenerator, requireAdvancedBacktesting };

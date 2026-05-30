@@ -1,16 +1,34 @@
+const db = require('../config/database');
 const aiGenerator = require('../services/aiGenerator');
 
 exports.generateStrategy = async (req, res) => {
   try {
-    const { description, market, timeframe, riskProfile } = req.body;
+    const prompt = req.body.prompt || req.body.description || '';
+    const market = req.body.market || 'forex';
+    const riskProfile = req.body.riskProfile || req.body.risk || 'moderate';
+    const timeframe = req.body.timeframe || 'H1';
 
-    if (!description || description.trim().length < 3) {
+    const input = prompt.trim();
+    if (input.length < 3) {
       return res.status(400).json({ error: 'Please provide a strategy description (at least 3 characters).' });
     }
 
-    const result = aiGenerator.generateFromDescription(description, market, timeframe, riskProfile);
+    const result = aiGenerator.generateFromPrompt(input, market, riskProfile);
 
-    res.json(result);
+    // Track AI generation
+    db.prepare('INSERT INTO ai_generations (user_id, prompt) VALUES (?, ?)').run(req.user.userId, input.slice(0, 500));
+
+    res.json({
+      config: result.config,
+      summary: result.summary,
+      rationale: result.rationale,
+      pros: result.pros,
+      cons: result.cons,
+      suggestedRisk: result.suggestedRisk,
+      accuracy: result.accuracy,
+      market: result.market,
+      riskProfile: result.riskProfile
+    });
   } catch (err) {
     console.error('AI generate error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -20,8 +38,8 @@ exports.generateStrategy = async (req, res) => {
 exports.explainStrategy = async (req, res) => {
   try {
     const { configuration } = req.body;
-    if (!configuration || !configuration.strategy) {
-      return res.status(400).json({ error: 'Valid strategy configuration is required' });
+    if (!configuration) {
+      return res.status(400).json({ error: 'Strategy configuration is required' });
     }
 
     const cfg = configuration;
@@ -29,13 +47,22 @@ exports.explainStrategy = async (req, res) => {
     const mm = cfg.moneyManagement || {};
     const tm = cfg.tradeManagement || {};
     const er = cfg.entryRules || {};
+    const symbol = cfg.symbol || 'EURUSD';
+    const tf = cfg.timeFrame || cfg.timeframe || 'H1';
+
+    // Generate rich explanation using aiGenerator logic
+    const desc = `${strategyName} ${symbol} ${tf}`;
+    const summary = aiGenerator.generateFromPrompt(desc, 'forex', 'moderate');
 
     const explanation = {
       strategy: strategyName,
-      summary: `This ${strategyName} strategy trades ${cfg.symbol || 'EURUSD'} on the ${cfg.timeFrame || 'H1'} timeframe.`,
-      entry_logic: `Enter on ${er.buySignal || 'custom'} signals for buys and ${er.sellSignal || 'custom'} for sells.`,
+      symbol,
+      timeframe: tf,
+      summary: summary.summary || `This ${strategyName} strategy trades ${symbol} on ${tf}.`,
+      entryLogic: er.buySignal ? `Enter on ${er.buySignal} signals for buys and ${er.sellSignal || 'custom'} for sells.` : 'Custom entry rules.',
       risk: `${mm.riskPerTrade || 1}% risk per trade with ${mm.lotSize || 0.1} lot size. ${tm.stopLoss || 50} pip stop loss, ${tm.takeProfit || 100} pip take profit.`,
-      details: cfg
+      rationale: summary.rationale || [],
+      config: cfg
     };
 
     res.json(explanation);
