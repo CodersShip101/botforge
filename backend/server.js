@@ -9,6 +9,13 @@ const db = require('./config/database');
 const botRoutes = require('./routes/bots');
 const { clerkAuth } = require('./middleware/clerk');
 
+process.on('unhandledRejection', (reason) => {
+  console.error('UNHANDLED REJECTION:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+});
+
 const app = express();
 
 app.use(helmet({ contentSecurityPolicy: false }));

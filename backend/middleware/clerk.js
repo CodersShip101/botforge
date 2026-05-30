@@ -2,7 +2,12 @@ const { getAuth, clerkClient } = require('@clerk/express');
 const db = require('../config/database');
 
 async function clerkAuth(req, res, next) {
-  const auth = getAuth(req);
+  let auth;
+  try {
+    auth = getAuth(req);
+  } catch (e) {
+    return res.status(401).json({ error: 'Authentication required (Clerk middleware not initialized)' });
+  }
   if (!auth?.userId) {
     return res.status(401).json({ error: 'Authentication required' });
   }
@@ -37,7 +42,12 @@ async function clerkAuth(req, res, next) {
 }
 
 async function optionalAuth(req, res, next) {
-  const auth = getAuth(req);
+  let auth;
+  try {
+    auth = getAuth(req);
+  } catch (e) {
+    return next();
+  }
   if (auth?.userId) {
     const user = db.prepare('SELECT * FROM users WHERE clerk_id = ?').get(auth.userId);
     req.auth = { userId: auth.userId, sessionId: auth.sessionId, localUser: user || null };
