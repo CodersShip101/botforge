@@ -28,22 +28,16 @@
     .plan-card .plan-name { font-size:1.2rem;font-weight:700 }
     .plan-card .plan-price { font-size:1.8rem;font-weight:800;color:var(--accent);margin:8px 0 }
     .plan-card .plan-desc { color:var(--text-muted);font-size:0.85rem;margin-bottom:12px }
-    .plan-card .plan-features { font-size:0.85rem;color:var(--text-muted);list-style:none;padding:0 }
-    .plan-card .plan-features li { padding:3px 0 }
-    .plan-card .plan-features li::before { content:'✓ ';color:var(--green) }
-    .session-item { display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px }
+    .plan-features { list-style:none;padding:0;margin:0;font-size:0.85rem;color:var(--text) }
+    .plan-features li { padding:4px 0 }
+    .plan-features li::before { content:'✓ ';color:var(--green);font-weight:700 }
+    .danger-zone { border:1px solid var(--red);border-radius:var(--radius);padding:24px;margin-top:24px }
+    .danger-zone h3 { color:var(--red);margin-bottom:8px;font-size:1.1rem }
+    .danger-zone p { color:var(--text-muted);font-size:0.85rem;margin-bottom:16px }
+    .session-item { display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px }
     .session-item .device { font-weight:500 }
-    .session-item .meta { color:var(--text-muted);font-size:0.82rem;margin-top:2px }
-    .session-item .current-badge { background:var(--accent);color:#fff;font-size:0.75rem;padding:2px 8px;border-radius:4px }
-    .plans-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px }
-    .danger-zone { margin-top:32px;padding:20px;border:1px solid var(--red);border-radius:var(--radius);background:rgba(255,59,59,0.05) }
-    .danger-zone h3 { color:var(--red);margin-bottom:8px }
-    .danger-zone p { color:var(--text-muted);font-size:0.85rem;margin-bottom:12px }
-    @media(max-width:768px) {
-      .settings-layout { grid-template-columns:1fr }
-      .settings-nav { flex-direction:row;overflow-x:auto;position:static;margin-bottom:20px }
-      .plans-grid { grid-template-columns:1fr }
-    }
+    .session-item .meta { font-size:0.8rem;color:var(--text-muted);margin-top:2px }
+    .current-badge { font-size:0.75rem;background:var(--accent);color:#fff;padding:2px 8px;border-radius:4px;margin-left:8px }
   </style>
 </head>
 <body>
@@ -58,224 +52,16 @@
     </div>
   </nav>
 
-  <div class="container settings-layout">
-    <nav class="settings-nav">
-      <a href="#" class="active" data-section="profile">Profile</a>
-      <a href="#" data-section="plan">Plan</a>
-      <a href="#" data-section="sessions">Devices</a>
-      <a href="#" data-section="security">Security</a>
-      <a href="#" data-section="danger">Danger Zone</a>
-    </nav>
-
-    <div>
-      <div id="profile" class="settings-section active">
-        <h2>Profile</h2>
-        <p class="sub">Your account information</p>
-        <div class="info-row"><span class="label">Email</span><span class="value" id="profile-email">-</span></div>
-        <div class="info-row"><span class="label">Username</span><span class="value" id="profile-username">-</span></div>
-        <div class="info-row"><span class="label">Plan</span><span class="value" id="profile-plan">-</span></div>
-        <div class="info-row"><span class="label">Member since</span><span class="value" id="profile-created">-</span></div>
-        <div class="info-row"><span class="label">Email verified</span><span class="value" id="profile-verified">-</span></div>
-      </div>
-
-      <div id="plan" class="settings-section">
-        <h2>Plan & Billing</h2>
-        <p class="sub">Choose the plan that fits your trading needs. Upgrade anytime.</p>
-        <div id="alert-area-plan"></div>
-        <div class="plans-grid" id="plans-grid"></div>
-        <div id="current-plan-info" style="text-align:center;color:var(--text-muted);font-size:0.85rem;margin-top:12px"></div>
-      </div>
-
-      <div id="sessions" class="settings-section">
-        <h2>Devices & Sessions</h2>
-        <p class="sub">Manage devices where you're signed in</p>
-        <div id="sessions-list"></div>
-      </div>
-
-      <div id="security" class="settings-section">
-        <h2>Security</h2>
-        <p class="sub">Password and authentication settings</p>
-        <div class="info-row">
-          <span class="label">Password</span>
-          <span><button class="btn btn-outline btn-sm" onclick="changePassword()">Change Password</button></span>
-        </div>
-        <div class="info-row">
-          <span class="label">Two-Factor Auth</span>
-          <span><a href="https://clerk.com" target="_blank" class="btn btn-outline btn-sm">Manage in Clerk</a></span>
-        </div>
-      </div>
-
-      <div id="danger" class="settings-section">
-        <div class="danger-zone">
-          <h3>Danger Zone</h3>
-          <p>Once you delete your account, there is no going back. Please be certain.</p>
-          <button class="btn btn-outline btn-sm" style="border-color:var(--red);color:var(--red)" onclick="confirmDeleteAccount()">Delete Account</button>
-        </div>
-      </div>
+  <div class="container">
+    <div style="text-align:center;margin:60px auto;max-width:480px">
+      <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:8px">Account Settings</h1>
+      <p style="color:var(--text-muted);margin-bottom:24px">
+        VANTIS AI is running in offline mode. Account settings and plans require a server connection.
+      </p>
+      <a href="dashboard.html" class="btn btn-primary btn-md">Back to Dashboard</a>
     </div>
   </div>
 
-  <script
-    data-clerk-publishable-key="pk_test_cmVzdGVkLWhhcmUtMzUuY2xlcmsuYWNjb3VudHMuZGV2JA"
-    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
-    crossorigin="anonymous"
-    onload="initClerk()"
-  ></script>
   <script src="js/app.js"></script>
-  <script>
-    let clerkReady = false;
-
-    function initClerk() {
-      window.Clerk.load({ publishableKey: 'pk_test_cmVzdGVkLWhhcmUtMzUuY2xlcmsuYWNjb3VudHMuZGV2JA' })
-        .then(() => { clerkReady = true; if (window.Clerk.user) loadSettings(); })
-        .catch(err => console.error('Clerk init error:', err));
-    }
-
-    // Nav tabs
-    document.querySelectorAll('.settings-nav a').forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        document.querySelectorAll('.settings-nav a').forEach(a => a.classList.remove('active'));
-        document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
-        link.classList.add('active');
-        document.getElementById(link.dataset.section).classList.add('active');
-      });
-    });
-
-    const PLAN_DETAILS = {
-      free: { name: 'Free', price: '£0', desc: 'Get started with basic bot building', features: ['1 bot', '3 backtests/day', 'MT4/MT5 code gen', 'Basic strategies'] },
-      pro: { name: 'Pro', price: '£19/mo', desc: 'For serious traders', features: ['999 bots', '50 backtests/day', 'AI strategy generator', 'Version history', 'Priority support'] },
-      elite: { name: 'Elite', price: '£49/mo', desc: 'Maximum power for professionals', features: ['9,999 bots', '200 backtests/day', 'Everything in Pro', 'Advanced analytics', 'Dedicated support'] }
-    };
-
-    async function loadSettings() {
-      if (!requireAuth()) return;
-      const token = await getClerkToken();
-      if (!token) return;
-
-      try {
-        const syncRes = await syncClerkUser(token);
-        const userData = syncRes || JSON.parse(localStorage.getItem('user') || '{}');
-
-        document.getElementById('profile-email').textContent = window.Clerk.user?.primaryEmailAddress?.emailAddress || '-';
-        document.getElementById('profile-username').textContent = window.Clerk.user?.username || window.Clerk.user?.fullName || '-';
-        document.getElementById('profile-plan').textContent = userData.plan || 'free';
-        document.getElementById('profile-created').textContent = formatDate(window.Clerk.user?.createdAt) || '-';
-        document.getElementById('profile-verified').textContent = window.Clerk.user?.primaryEmailAddress?.verification?.status === 'verified' ? 'Yes' : 'No';
-
-        loadPlanInfo();
-        loadSessions();
-      } catch (err) {
-        console.error('Settings load error:', err);
-      }
-    }
-
-    async function loadPlanInfo() {
-      try {
-        const data = await getPlan();
-        if (data) {
-          document.getElementById('profile-plan').textContent = data.plan;
-          document.getElementById('current-plan-info').textContent = `Current plan: ${capitalize(data.plan)} (${data.usage.bots} bots, ${data.usage.backtestsToday} backtests today)`;
-        }
-      } catch {}
-      renderPlanCards();
-    }
-
-    function renderPlanCards() {
-      const grid = document.getElementById('plans-grid');
-      grid.innerHTML = '';
-      Object.entries(PLAN_DETAILS).forEach(([key, p]) => {
-        const card = document.createElement('div');
-        card.className = 'plan-card';
-        card.innerHTML = `
-          <div class="plan-name">${p.name}</div>
-          <div class="plan-price">${p.price}</div>
-          <div class="plan-desc">${p.desc}</div>
-          <ul class="plan-features">${p.features.map(f => `<li>${f}</li>`).join('')}</ul>
-          <button class="btn btn-primary btn-sm" style="width:100%;margin-top:12px" onclick="upgradePlan('${key}')">${key === 'free' ? 'Current' : 'Upgrade'}</button>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    async function upgradePlan(plan) {
-      if (plan === 'free') return;
-      try {
-        await upgradePlan(plan);
-        showAlert(`Upgraded to ${capitalize(plan)}!`, 'success', document.getElementById('alert-area-plan'));
-        loadPlanInfo();
-      } catch (err) {
-        showAlert(err.message, 'error', document.getElementById('alert-area-plan'));
-      }
-    }
-
-    async function loadSessions() {
-      const list = document.getElementById('sessions-list');
-      list.innerHTML = '<p style="color:var(--text-muted)">Loading sessions...</p>';
-      try {
-        const sessions = await fetchAPI('/sessions');
-        list.innerHTML = '';
-        if (!sessions.length) {
-          list.innerHTML = '<p style="color:var(--text-muted)">No active sessions.</p>';
-          return;
-        }
-        sessions.forEach(s => {
-          const div = document.createElement('div');
-          div.className = 'session-item';
-          const isCurrent = s.id === localStorage.getItem('clerk_session_id');
-          div.innerHTML = `
-            <div>
-              <div class="device">${s.deviceName || s.browser || 'Unknown device'} ${isCurrent ? '<span class="current-badge">Current</span>' : ''}</div>
-              <div class="meta">${s.ip || 'Unknown IP'} · ${s.country || ''} · ${formatDate(s.lastActiveAt || s.createdAt || new Date().toISOString())}</div>
-            </div>
-            ${!isCurrent ? `<button class="btn btn-outline btn-sm" onclick="revokeSession('${s.id}')">Revoke</button>` : ''}
-          `;
-          list.appendChild(div);
-        });
-      } catch (err) {
-        list.innerHTML = '<p style="color:var(--text-muted)">Could not load sessions.</p>';
-      }
-    }
-
-    async function revokeSession(id) {
-      if (!confirm('Revoke this session?')) return;
-      try {
-        await fetchAPI(`/sessions/${id}`, 'DELETE');
-        showAlert('Session revoked', 'success');
-        loadSessions();
-      } catch (err) {
-        showAlert(err.message, 'error');
-      }
-    }
-
-    async function changePassword() {
-      if (!window.Clerk?.user) { showAlert('Please sign in first', 'error'); return; }
-      try {
-        await window.Clerk.user.update({ password: prompt('Enter new password (min 8 chars):') });
-        showAlert('Password updated successfully', 'success');
-      } catch (err) {
-        showAlert(err.errors?.[0]?.message || 'Failed to update password', 'error');
-      }
-    }
-
-    async function confirmDeleteAccount() {
-      if (!confirm('Are you sure you want to delete your account? This cannot be undone.')) return;
-      if (!confirm('Really delete? All bots, backtests, and data will be lost forever.')) return;
-      try {
-        if (window.Clerk?.user) {
-          await window.Clerk.user.delete();
-        }
-        localStorage.clear();
-        window.location.href = 'index.html';
-      } catch (err) {
-        showAlert('Failed to delete account', 'error');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      await checkBackend();
-      if (!isAuthenticated()) { window.location.href = 'login.html'; }
-    });
-  </script>
 </body>
 </html>

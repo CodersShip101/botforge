@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <meta http-equiv="refresh" content="0;url=dashboard.html">
 </head>
 <body>
   <nav class="navbar">
@@ -22,73 +23,14 @@
   </nav>
 
   <div class="container">
-    <div style="max-width:480px;margin:80px auto">
-      <div id="state-verifying" style="text-align:center;padding:32px">
-        <h2>Verifying your email...</h2>
-        <p style="color:var(--text-muted);margin-top:12px">Please wait while we confirm your email address.</p>
-      </div>
-
-      <div id="state-success" style="display:none">
-        <div style="background:var(--bg-card);border:1px solid var(--green);border-radius:var(--radius);padding:32px;text-align:center">
-          <h2 style="color:var(--green);margin-bottom:12px">Email Verified</h2>
-          <p style="color:var(--text-muted);margin-bottom:20px">Your email has been verified. You can now sign in and start building trading bots.</p>
-          <a href="login.html" class="btn btn-primary btn-md">Sign In</a>
-        </div>
-      </div>
-
-      <div id="state-error" style="display:none">
-        <div style="background:var(--bg-card);border:1px solid var(--red);border-radius:var(--radius);padding:32px;text-align:center">
-          <h2 style="color:var(--red);margin-bottom:12px">Verification Failed</h2>
-          <p style="color:var(--text-muted);margin-bottom:20px" id="error-message">This verification link is invalid or has expired.</p>
-          <a href="login.html" class="btn btn-primary btn-md">Go to Sign In</a>
-        </div>
+    <div style="max-width:420px;margin:60px auto;text-align:center">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:32px">
+        <h3 style="margin-bottom:12px">Redirecting to Dashboard</h3>
+        <p style="color:var(--text-muted)">Taking you to the dashboard where you can manage your bots locally.</p>
       </div>
     </div>
   </div>
 
-  <script
-    data-clerk-publishable-key="pk_test_cmVzdGVkLWhhcmUtMzUuY2xlcmsuYWNjb3VudHMuZGV2JA"
-    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
-    crossorigin="anonymous"
-    onload="initClerk()"
-  ></script>
   <script src="js/app.js"></script>
-  <script>
-    let clerkReady = false;
-
-    function initClerk() {
-      window.Clerk.load({ publishableKey: 'pk_test_cmVzdGVkLWhhcmUtMzUuY2xlcmsuYWNjb3VudHMuZGV2JA' })
-        .then(() => { clerkReady = true; verifyFlow(); })
-        .catch(err => console.error('Clerk init error:', err));
-    }
-
-    async function verifyFlow() {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
-      const clerkTicket = params.get('__clerk_ticket');
-
-      if (!token && !clerkTicket) {
-        showError('No verification token provided.');
-        return;
-      }
-
-      try {
-        // Try Clerk client-side verification
-        if (clerkTicket && window.Clerk.client) {
-          await window.Clerk.client.signUp.attemptEmailAddressVerification({ strategy: 'email_code', code: clerkTicket });
-        }
-        document.getElementById('state-verifying').style.display = 'none';
-        document.getElementById('state-success').style.display = 'block';
-      } catch (err) {
-        showError(err.errors?.[0]?.message || err.message || 'Verification failed. The link may be invalid or expired.');
-      }
-    }
-
-    function showError(msg) {
-      document.getElementById('state-verifying').style.display = 'none';
-      document.getElementById('state-error').style.display = 'block';
-      document.getElementById('error-message').textContent = msg;
-    }
-  </script>
 </body>
 </html>

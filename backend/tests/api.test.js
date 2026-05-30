@@ -3,51 +3,10 @@ const path = require('path');
 const db = require('../config/database');
 const request = require('supertest');
 
-// Mock Clerk verifyToken to bypass actual auth in tests
-jest.mock('@clerk/backend', () => ({
-  createClerkClient: jest.fn(() => ({
-    users: {
-      getUser: jest.fn(() => Promise.resolve({
-        emailAddresses: [{ emailAddress: 'test-user@test.com' }],
-        username: 'testuser'
-      })),
-      getUserSessionList: jest.fn(() => Promise.resolve([]))
-    },
-    sessions: {
-      revoke: jest.fn(() => Promise.resolve())
-    },
-    verifyToken: jest.fn(() => Promise.resolve({ sub: 'test_clerk_user_123', sid: 'test_session' }))
-  })),
-  verifyToken: jest.fn(() => Promise.resolve({ sub: 'test_clerk_user_123', sid: 'test_session' }))
-}));
-
-// Mock @clerk/express so clerkMiddleware() sets req.auth and passes through
-jest.mock('@clerk/express', () => ({
-  clerkMiddleware: jest.fn(() => (req, res, next) => {
-    if (req.headers?.authorization?.startsWith('Bearer ')) {
-      req.auth = { userId: 'test_clerk_user_123', sessionId: 'test_session' };
-    }
-    next();
-  }),
-  getAuth: jest.fn((req) => req.auth || {}),
-  requireAuth: jest.fn(() => (req, res, next) => next()),
-  clerkClient: {
-    users: {
-      getUser: jest.fn(() => Promise.resolve({
-        emailAddresses: [{ emailAddress: 'test-user@test.com' }],
-        username: 'testuser'
-      })),
-      getUserSessionList: jest.fn(() => Promise.resolve([]))
-    },
-    sessions: {
-      revoke: jest.fn(() => Promise.resolve())
-    }
-  }
-}));
-
 const app = require('../server');
 
-let testToken = 'mock_jwt_token_xyz';
+// In offline mode, the bearer token value is used as the user identifier (clerk_id)
+let testToken = 'test_clerk_user_123';
 let testBotId = null;
 
 beforeAll(async () => {

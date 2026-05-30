@@ -4,10 +4,9 @@ const helmet = require('helmet');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 
-const { clerkMiddleware } = require('@clerk/express');
 const db = require('./config/database');
 const botRoutes = require('./routes/bots');
-const { clerkAuth, clerkClient } = require('./middleware/clerk');
+const { clerkAuth } = require('./middleware/clerk');
 const { PLAN_LIMITS } = require('./middleware/planLimit');
 
 const app = express();
@@ -16,8 +15,7 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
-// Clerk middleware verifies session tokens from Authorization header
-app.use(clerkMiddleware());
+// Auth is handled per-route via clerkAuth (gracefully falls back when Clerk API unavailable)
 
 // Serve frontend files (parent directory)
 app.use(express.static(path.join(__dirname, '..')));
@@ -95,41 +93,17 @@ app.post('/api/auth/plan/upgrade', clerkAuth, async (req, res) => {
   }
 });
 
-// Device management via Clerk
-app.get('/api/sessions', clerkAuth, async (req, res) => {
-  try {
-    const sessions = await clerkClient.users.getUserSessionList(req.auth.userId);
-    res.json(sessions);
-  } catch (err) {
-    console.error('Sessions error:', err);
-    res.status(500).json({ error: 'Failed to fetch sessions' });
-  }
+// Device management — unavailable without Clerk
+app.get('/api/sessions', clerkAuth, (req, res) => {
+  res.json([]);
 });
 
-app.delete('/api/sessions/:id', clerkAuth, async (req, res) => {
-  try {
-    await clerkClient.sessions.revoke(req.params.id);
-    res.json({ message: 'Session revoked' });
-  } catch (err) {
-    console.error('Revoke session error:', err);
-    res.status(500).json({ error: 'Failed to revoke session' });
-  }
+app.delete('/api/sessions/:id', clerkAuth, (req, res) => {
+  res.json({ message: 'Session management unavailable' });
 });
 
-app.delete('/api/sessions', clerkAuth, async (req, res) => {
-  try {
-    const sessions = await clerkClient.users.getUserSessionList(req.auth.userId);
-    const currentSessionId = req.auth.sessionId;
-    for (const session of sessions.data) {
-      if (session.id !== currentSessionId) {
-        await clerkClient.sessions.revoke(session.id);
-      }
-    }
-    res.json({ message: 'All other sessions revoked' });
-  } catch (err) {
-    console.error('Revoke all sessions error:', err);
-    res.status(500).json({ error: 'Failed to revoke sessions' });
-  }
+app.delete('/api/sessions', clerkAuth, (req, res) => {
+  res.json({ message: 'Session management unavailable' });
 });
 
 app.use((err, req, res, next) => {

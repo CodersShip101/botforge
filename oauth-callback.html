@@ -3,42 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Signing in... - VANTIS AI</title>
+  <title>Redirecting - VANTIS AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <meta http-equiv="refresh" content="0;url=dashboard.html">
 </head>
 <body>
-  <div class="container" style="display:flex;align-items:center;justify-content:center;min-height:100vh">
-    <div style="text-align:center">
-      <h2 style="margin-bottom:12px">Signing you in...</h2>
-      <p style="color:var(--text-muted)">Please wait while we complete your authentication.</p>
+  <div class="container" style="max-width:420px;margin:120px auto;text-align:center">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:32px">
+      <h3 style="margin-bottom:12px">Redirecting...</h3>
+      <p style="color:var(--text-muted)">Taking you to the dashboard.</p>
+      <a href="dashboard.html" class="btn btn-primary btn-md" style="display:block;text-align:center;margin-top:16px">Go to Dashboard</a>
     </div>
   </div>
-
-  <script
-    data-clerk-publishable-key="pk_test_cmVzdGVkLWhhcmUtMzUuY2xlcmsuYWNjb3VudHMuZGV2JA"
-    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
-    crossorigin="anonymous"
-  ></script>
-  <script>
-    (async () => {
-      try {
-        await window.Clerk.load();
-        if (window.Clerk.user && window.Clerk.session) {
-          // Standalone redirect (not a popup) — session synced successfully
-          window.location.href = 'dashboard.html';
-        } else {
-          // Popup flow — Clerk JS sends postMessage to opener and closes
-        }
-      } catch (err) {
-        console.error('OAuth callback error:', err);
-        if (!window.opener) {
-          window.location.href = 'login.html?error=oauth_failed';
-        }
-      }
-    })();
-  </script>
 </body>
 </html>

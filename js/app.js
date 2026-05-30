@@ -1,32 +1,13 @@
 const API_BASE = '/api';
 let backendOnline = null;
 
-// Clerk session helpers
+// Offline mode — no external auth provider
 async function getClerkToken() {
-  if (window.Clerk?.session) {
-    try { return await window.Clerk.session.getToken(); } catch { return null; }
-  }
   return localStorage.getItem('clerk_session') || null;
 }
 
 function isAuthenticated() {
-  return !!(window.Clerk?.user) || !!localStorage.getItem('clerk_session');
-}
-
-async function syncClerkUser(token) {
-  const user = window.Clerk?.user;
-  if (!user) return null;
-  const res = await fetch(`${API_BASE}/auth/sync`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({
-      userId: user.id,
-      email: user.primaryEmailAddress?.emailAddress || '',
-      username: user.username || user.fullName || ''
-    })
-  });
-  if (!res.ok) return null;
-  return await res.json();
+  return !!localStorage.getItem('clerk_session');
 }
 
 async function checkBackend() {
@@ -283,31 +264,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   const path = window.location.pathname.split('/').pop() || 'index.html';
-  if (path === 'builder.html' || path === 'dashboard.html') {
-    if (!requireAuth()) return;
-  }
   if (path === 'builder.html' && typeof initBuilder === 'function') initBuilder();
   if (path === 'dashboard.html' && typeof initDashboard === 'function') initDashboard();
 
-  // Update nav
+  // Update nav - remove Sign In link if user has local data
   const nav = document.querySelector('.nav-links');
-  if (nav && isAuthenticated()) {
-    const authLink = document.createElement('a');
-    authLink.href = '#';
-    authLink.textContent = window.Clerk?.user?.username || 'Account';
-    authLink.style.opacity = '0.6';
+  if (nav && localStorage.getItem('botforge_bots')) {
     const signOutLink = document.createElement('a');
     signOutLink.href = '#';
-    signOutLink.textContent = 'Sign Out';
-    signOutLink.addEventListener('click', async (e) => {
+    signOutLink.textContent = 'Clear Local Data';
+    signOutLink.style.opacity = '0.6';
+    signOutLink.addEventListener('click', (e) => {
       e.preventDefault();
-      if (window.Clerk) await window.Clerk.signOut();
-      localStorage.removeItem('clerk_session');
-      localStorage.removeItem('user');
-      window.location.href = 'index.html';
+      if (confirm('Clear all locally saved bots?')) {
+        localStorage.removeItem('botforge_bots');
+        window.location.reload();
+      }
     });
-    if (!document.querySelector('.nav-links a[href="login.html"]')) {
-      nav.appendChild(authLink);
+    if (!document.querySelector('.nav-links a[href="login.html"]') && !document.querySelector('.nav-links a[href="#"]')) {
       nav.appendChild(signOutLink);
     }
   }
