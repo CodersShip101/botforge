@@ -322,11 +322,13 @@
       let planData;
       try {
         const res = await fetch('/api/account/plan', { headers: { 'Authorization': `Bearer ${token}` } });
-        planData = res.ok ? await res.json() : { plan: 'free', limits: { maxBots: 1, maxBacktestsPerDay: 3 } };
-      } catch { planData = { plan: 'free', limits: { maxBots: 1, maxBacktestsPerDay: 3 } }; }
+        planData = res.ok ? await res.json() : { plan: 'free', limits: { botLimit: 1, backtestLimit: 3 } };
+      } catch { planData = { plan: 'free', limits: { botLimit: 1, backtestLimit: 3 } }; }
 
       const plan = planData.plan || 'free';
-      const limits = planData.limits || {};
+      const L = planData.limits || {};
+      const botLimit = L.bots || L.maxBots || L.botLimit || 1;
+      const backtestLimit = L.backtests || L.maxBacktestsPerDay || L.backtestLimit || 3;
       const planLabel = PLAN_LIST.find(p => p.id === plan);
 
       document.getElementById('current-plan-info').innerHTML = `
@@ -340,11 +342,11 @@
       document.getElementById('usage-limits').innerHTML = `
         <div style="padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm)">
           <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">Bots</div>
-          <div style="font-size:1.1rem;font-weight:700;font-family:var(--font-mono)">${limits.maxBots === -1 ? '∞' : limits.maxBots || 1}</div>
+          <div style="font-size:1.1rem;font-weight:700;font-family:var(--font-mono)">${botLimit === -1 ? '∞' : botLimit}</div>
         </div>
         <div style="padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm)">
           <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">Backtests / Day</div>
-          <div style="font-size:1.1rem;font-weight:700;font-family:var(--font-mono)">${limits.maxBacktestsPerDay === -1 ? '∞' : limits.maxBacktestsPerDay || 3}</div>
+          <div style="font-size:1.1rem;font-weight:700;font-family:var(--font-mono)">${backtestLimit === -1 ? '∞' : backtestLimit}</div>
         </div>
       `;
 
@@ -368,10 +370,11 @@
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ plan })
         });
-        if (!res.ok) throw new Error('Upgrade failed');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upgrade failed');
         showAlert(`Upgraded to ${capitalize(plan)}!`, 'success');
         await loadPlan(token);
-      } catch { showAlert('Upgrade failed', 'error'); }
+      } catch (err) { showAlert(err.message || 'Upgrade failed', 'error'); }
     }
 
     async function loadSessions(token) {
