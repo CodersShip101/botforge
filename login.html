@@ -90,6 +90,22 @@
 
   <script src="js/app.js"></script>
   <script>
+    async function loadOAuthConfig() {
+      try {
+        const res = await fetch('/api/auth/config');
+        const config = await res.json();
+        if (config.oauth) {
+          let anyVisible = false;
+          document.querySelectorAll('.auth-btn.google, .auth-btn.facebook').forEach(el => {
+            const provider = el.classList.contains('google') ? 'google' : 'facebook';
+            if (!config.oauth[provider]) { el.style.display = 'none'; } else { anyVisible = true; }
+          });
+          if (!anyVisible) document.querySelector('.divider').style.display = 'none';
+        }
+      } catch {}
+    }
+    loadOAuthConfig();
+
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
