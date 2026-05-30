@@ -9,7 +9,14 @@ const { OAUTH_PROVIDERS } = require('../config/passport');
 const router = express.Router();
 
 router.get('/config', (req, res) => {
-  res.json({ oauth: OAUTH_PROVIDERS });
+  res.json({
+    oauth: OAUTH_PROVIDERS,
+    callbackURLs: {
+      google: process.env.GOOGLE_CALLBACK_URL || (process.env.FRONTEND_URL || `http://localhost:${process.env.PORT || 5000}`) + '/api/auth/oauth/google/callback',
+      facebook: process.env.FACEBOOK_CALLBACK_URL || (process.env.FRONTEND_URL || `http://localhost:${process.env.PORT || 5000}`) + '/api/auth/oauth/facebook/callback'
+    },
+    frontendURL: process.env.FRONTEND_URL || 'not set'
+  });
 });
 
 router.post('/register', validation.validateRegister, authController.register);

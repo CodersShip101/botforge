@@ -2,9 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 const session = require('express-session');
 const passport = require('./config/passport');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 
 const db = require('./config/database');
 const botRoutes = require('./routes/bots');
