@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account - VANTIS AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="logo">VANTIS AI</a>
+      <div class="nav-links">
+        <a href="builder.html">Bot Builder</a>
+        <a href="dashboard.html">My Bots</a>
+        <a href="docs.html">Docs</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" id="app">
+    <div id="loadingMsg" style="text-align:center;margin:60px auto;max-width:480px">
+      <p style="color:var(--text-muted)">Loading account...</p>
+    </div>
+
+    <div class="account-layout" id="accountLayout" style="display:none">
+      <aside class="account-sidebar">
+        <div class="account-sidebar-heading">Account</div>
+        <nav class="account-nav" id="account-nav">
+          <a href="#" class="active" data-tab="profile">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+          <a href="#" data-tab="security">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Security</a>
+          <a href="#" data-tab="billing">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Billing & Plan</a>
+          <a href="#" data-tab="devices">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>Devices</a>
+          <a href="#" data-tab="api-keys">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</a>
+          <a href="#" data-tab="notifications">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</a>
+          <a href="#" data-tab="connected">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Connected Accounts</a>
+          <a href="#" data-tab="danger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Danger Zone</a>
+        </nav>
+      </aside>
+
+      <main class="account-main">
+
+        <!-- PROFILE TAB -->
+        <div class="account-tab active" id="tab-profile">
+          <h2>Profile</h2>
+          <p class="tab-desc">Manage your personal information.</p>
+          <div class="settings-card">
+            <h3>Avatar</h3>
+            <div style="display:flex;align-items:center;gap:16px">
+              <div id="profile-avatar-preview" style="width:64px;height:64px;border-radius:50%;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0"></div>
+              <div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:8px">Managed by Clerk</p>
+                <button class="btn btn-accent btn-sm" onclick="window.Clerk.openUserProfile()">Change in Clerk</button>
+              </div>
+            </div>
+          </div>
+          <div class="settings-card">
+            <h3>Personal Info</h3>
+            <div id="profile-info"></div>
+            <button class="btn btn-accent btn-sm" onclick="window.Clerk.openUserProfile()" style="margin-top:16px">Edit in Clerk</button>
+          </div>
+        </div>
+
+        <!-- SECURITY TAB -->
+        <div class="account-tab" id="tab-security">
+          <h2>Security</h2>
+          <p class="tab-desc">Manage your password, 2FA, and session security.</p>
+          <div class="settings-card">
+            <h3>Password</h3>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px">Last changed: <span id="password-last-changed">-</span></p>
+            <button class="btn btn-accent btn-sm" onclick="window.Clerk.openUserProfile()">Change Password</button>
+          </div>
+          <div class="settings-card">
+            <h3>Two-Factor Authentication (2FA)</h3>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px">Add an extra layer of security to your account.</p>
+            <div id="2fa-status">Loading...</div>
+          </div>
+          <div class="settings-card">
+            <h3>Session Security</h3>
+            <div id="session-security">
+              <div class="info-row"><span class="label">Last Login</span><span class="value" id="last-login">-</span></div>
+              <div class="info-row"><span class="label">Last Login IP</span><span class="value" id="last-login-ip">-</span></div>
+              <div class="info-row"><span class="label">Current Device</span><span class="value" id="current-device">-</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BILLING & PLAN TAB -->
+        <div class="account-tab" id="tab-billing">
+          <h2>Billing & Plan</h2>
+          <p class="tab-desc">Manage your subscription and usage limits.</p>
+          <div class="settings-card">
+            <h3>Current Plan</h3>
+            <div id="current-plan-info" style="margin-bottom:16px"></div>
+            <div id="usage-limits" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
+          </div>
+          <div class="settings-card">
+            <h3>Upgrade Plan</h3>
+            <div class="plans-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px" id="plansGrid"></div>
+          </div>
+          <div class="settings-card">
+            <h3>Billing History</h3>
+            <div id="billing-history"><p style="color:var(--text-muted);font-size:0.85rem">No billing history yet.</p></div>
+          </div>
+        </div>
+
+        <!-- DEVICES TAB -->
+        <div class="account-tab" id="tab-devices">
+          <h2>Devices</h2>
+          <p class="tab-desc">Manage active sessions and logged-in devices.</p>
+          <div class="settings-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <h3 style="margin:0">Active Sessions</h3>
+              <button class="btn btn-danger btn-sm" onclick="revokeAllSessions()">Log Out All Devices</button>
+            </div>
+            <div id="active-sessions-list"></div>
+          </div>
+        </div>
+
+        <!-- API KEYS TAB -->
+        <div class="account-tab" id="tab-api-keys">
+          <h2>API Keys</h2>
+          <p class="tab-desc">Manage your API keys for programmatic access.</p>
+          <div class="settings-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <h3 style="margin:0">Your API Keys</h3>
+              <button class="btn btn-primary btn-sm" onclick="generateApiKey()">+ Generate New Key</button>
+            </div>
+            <div id="api-keys-list"><p style="color:var(--text-muted);font-size:0.85rem">No API keys generated yet.</p></div>
+          </div>
+          <div class="settings-card">
+            <h3>Usage</h3>
+            <div id="api-usage">
+              <div class="info-row"><span class="label">Rate Limit</span><span class="value">100 requests/hour</span></div>
+              <div class="info-row"><span class="label">Last Used</span><span class="value" id="api-last-used">-</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTIFICATIONS TAB -->
+        <div class="account-tab" id="tab-notifications">
+          <h2>Notifications</h2>
+          <p class="tab-desc">Manage your notification preferences.</p>
+          <div class="settings-card">
+            <h3>Email Notifications</h3>
+            <div id="email-notif-prefs"></div>
+          </div>
+          <div class="settings-card">
+            <h3>In-App Notifications</h3>
+            <div id="inapp-notif-prefs"></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveNotifPrefs()">Save Notification Settings</button>
+          <div id="notif-saved" style="display:none;margin-top:12px;padding:10px 14px;background:rgba(0,255,138,0.1);border:1px solid rgba(0,255,138,0.3);border-radius:8px;color:var(--green);font-size:0.85rem">Settings saved.</div>
+        </div>
+
+        <!-- CONNECTED ACCOUNTS TAB -->
+        <div class="account-tab" id="tab-connected">
+          <h2>Connected Accounts</h2>
+          <p class="tab-desc">Manage your social login connections.</p>
+          <div class="settings-card">
+            <h3>Social Logins</h3>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px">Connect social accounts for quick sign-in.</p>
+            <div id="connected-accounts-list"></div>
+          </div>
+        </div>
+
+        <!-- DANGER ZONE TAB -->
+        <div class="account-tab" id="tab-danger">
+          <h2>Danger Zone</h2>
+          <p class="tab-desc">Irreversible destructive actions.</p>
+          <div class="settings-card danger-card">
+            <h3>Delete Account</h3>
+            <p>Permanently delete your account and all associated data. This action cannot be undone. All bots, backtests, and saved data will be permanently removed.</p>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAccount()">Delete Account</button>
+          </div>
+          <div class="settings-card danger-card">
+            <h3>Reset Account</h3>
+            <p>Remove all bots, backtests, and settings. Your account and profile will remain.</p>
+            <button class="btn btn-danger btn-sm" onclick="confirmResetAccount()">Reset Account</button>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script
+    data-clerk-publishable-key="pk_test_dG91Y2hpbmctcGVsaWNhbi00MS5jbGVyay5hY2NvdW50cy5kZXYk"
+    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4/dist/clerk.browser.js"
+    crossorigin="anonymous"
+  ></script>
+  <script src="js/app.js"></script>
+  <script>
+    const PLAN_LIST = [
+      { id: 'free', name: 'Free', price: '$0', desc: 'Get started with basic bot building', features: ['1 bot', '3 backtests/day', 'Standard backtesting'] },
+      { id: 'pro', name: 'Pro', price: '$29', desc: 'For serious algo traders', features: ['Unlimited bots', '50 backtests/day', 'AI Strategy Generator', 'Advanced backtesting'] },
+      { id: 'elite', name: 'Elite', price: '$99', desc: 'Maximum power and flexibility', features: ['Unlimited bots', '200 backtests/day', 'AI Strategy Generator', 'Advanced backtesting', 'Priority support'] }
+    ];
+
+    const NOTIF_PREFS_DEFAULT = {
+      email_backtest_completed: true,
+      email_bot_error: true,
+      email_daily_summary: false,
+      email_weekly_report: false,
+      inapp_backtest_completed: true,
+      inapp_bot_error: true,
+      inapp_updates: true
+    };
+
+    let notifPrefs = { ...NOTIF_PREFS_DEFAULT };
+
+    document.querySelectorAll('.account-nav a').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.account-nav a').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.account-tab').forEach(x => x.classList.remove('active'));
+        a.classList.add('active');
+        document.getElementById('tab-' + a.dataset.tab).classList.add('active');
+        history.replaceState(null, '', '?tab=' + a.dataset.tab);
+      });
+    });
+
+    (async () => {
+      try { await window.Clerk.load(); } catch { window.location.href = 'login.html'; return; }
+      if (!window.Clerk.user) { window.location.href = 'login.html'; return; }
+
+      const token = await window.Clerk.session?.getToken();
+      if (!token) { document.getElementById('loadingMsg').innerHTML = '<p>Session error.</p>'; return; }
+
+      localStorage.setItem('vantis_token', token);
+      const user = window.Clerk.user;
+      localStorage.setItem('vantis_user', JSON.stringify({ id: user.id, email: user.primaryEmailAddress?.emailAddress, username: user.username }));
+
+      document.getElementById('loadingMsg').style.display = 'none';
+      document.getElementById('accountLayout').style.display = '';
+      renderProfileDropdown();
+
+      const params = new URLSearchParams(location.search);
+      if (params.get('tab')) {
+        const tabLink = document.querySelector(`.account-nav a[data-tab="${params.get('tab')}"]`);
+        if (tabLink) tabLink.click();
+      }
+
+      await loadProfile(user);
+      await loadSecurity(user, token);
+      await loadPlan(token);
+      await loadSessions(token);
+      await loadApiKeys(token);
+      await loadNotifPrefs(token);
+      await loadConnectedAccounts(user);
+    })();
+
+    async function loadProfile(user) {
+      const name = user.fullName || user.username || 'User';
+      const email = user.primaryEmailAddress?.emailAddress || '';
+      const avatarUrl = user.imageUrl || '';
+      const initial = (user.fullName || user.username || email || 'U')[0].toUpperCase();
+      const joined = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-';
+
+      const avatarPreview = document.getElementById('profile-avatar-preview');
+      if (avatarUrl) { avatarPreview.innerHTML = `<img src="${avatarUrl}" alt="" style="width:100%;height:100%;object-fit:cover">`; }
+      else { avatarPreview.innerHTML = `<span style="font-weight:700;font-size:1.2rem;color:var(--accent);font-family:var(--font-display)">${initial}</span>`; }
+
+      const plan = await getPlan().catch(() => null);
+      const planBadge = plan ? `<span class="plan-badge plan-badge-${plan.plan}">${capitalize(plan.plan)}</span>` : '';
+
+      document.getElementById('profile-info').innerHTML = `
+        <div class="info-row"><span class="label">Full Name</span><span class="value">${name}</span></div>
+        <div class="info-row"><span class="label">Username</span><span class="value">${user.username || 'Not set'}</span></div>
+        <div class="info-row"><span class="label">Email</span><span class="value">${email}</span></div>
+        <div class="info-row"><span class="label">Plan</span><span class="value">${planBadge || '-'}</span></div>
+        <div class="info-row"><span class="label">Joined</span><span class="value">${joined}</span></div>
+      `;
+    }
+
+    async function loadSecurity(user, token) {
+      const hasPassword = user.passwordEnabled;
+      document.getElementById('password-last-changed').textContent = hasPassword ? 'Enabled' : 'Not set';
+
+      const totp = user.totpEnabled;
+      document.getElementById('2fa-status').innerHTML = totp
+        ? `<span style="color:var(--green);font-weight:500">2FA is enabled</span> <button class="btn btn-accent btn-sm" onclick="window.Clerk.openUserProfile()" style="margin-left:12px">Manage</button>`
+        : `<span style="color:var(--text-muted)">2FA is not enabled</span> <button class="btn btn-accent btn-sm" onclick="window.Clerk.openUserProfile()" style="margin-left:12px">Enable</button>`;
+
+      try {
+        const res = await fetch('/api/auth/sessions/last', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('last-login').textContent = data.lastLogin || '-';
+          document.getElementById('last-login-ip').textContent = data.lastIp || '-';
+        }
+      } catch {}
+      document.getElementById('current-device').textContent = navigator.userAgent.split(' ').slice(-2).join(' ').replace(/[()]/g,'') || navigator.platform;
+    }
+
+    async function loadPlan(token) {
+      let planData;
+      try {
+        const res = await fetch('/api/auth/plan', { headers: { 'Authorization': `Bearer ${token}` } });
+        planData = res.ok ? await res.json() : { plan: 'free', limits: { maxBots: 1, maxBacktestsPerDay: 3 } };
+      } catch { planData = { plan: 'free', limits: { maxBots: 1, maxBacktestsPerDay: 3 } }; }
+
+      const plan = planData.plan || 'free';
+      const limits = planData.limits || {};
+      const planLabel = PLAN_LIST.find(p => p.id === plan);
+
+      document.getElementById('current-plan-info').innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <span style="font-size:1.3rem;font-weight:700;font-family:var(--font-display)">${capitalize(plan)}</span>
+          <span class="plan-badge plan-badge-${plan}">${planLabel?.price || '$0'}/mo</span>
+        </div>
+        <p style="font-size:0.85rem;color:var(--text-muted)">${planLabel?.desc || ''}</p>
+      `;
+
+      document.getElementById('usage-limits').innerHTML = `
+        <div style="padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm)">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">Bots</div>
+          <div style="font-size:1.1rem;font-weight:700;font-family:var(--font-mono)">${limits.maxBots === -1 ? '∞' : limits.maxBots || 1}</div>
+        </div>
+        <div style="padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm)">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">Backtests / Day</div>
+          <div style="font-size:1.1rem;font-weight:700;font-family:var(--font-mono)">${limits.maxBacktestsPerDay === -1 ? '∞' : limits.maxBacktestsPerDay || 3}</div>
+        </div>
+      `;
+
+      document.getElementById('plansGrid').innerHTML = PLAN_LIST.map(p => `
+        <div class="plan-card ${p.id === plan ? 'selected' : ''}" onclick="upgradePlanAction('${p.id}')">
+          <div class="plan-name">${p.name}</div>
+          <div class="plan-price">${p.price}<span style="font-size:0.9rem;font-weight:400;color:var(--text-muted)">/mo</span></div>
+          <div class="plan-desc">${p.desc}</div>
+          <ul class="plan-features">${p.features.map(f => `<li>${f}</li>`).join('')}</ul>
+          ${p.id === plan ? '<div style="margin-top:12px;text-align:center;font-size:0.8rem;color:var(--accent);font-weight:600">Current Plan</div>' : ''}
+        </div>
+      `).join('');
+    }
+
+    async function upgradePlanAction(plan) {
+      const token = await window.Clerk.session?.getToken();
+      if (!token) return;
+      try {
+        const res = await fetch('/api/auth/plan/upgrade', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan })
+        });
+        if (!res.ok) throw new Error('Upgrade failed');
+        showAlert(`Upgraded to ${capitalize(plan)}!`, 'success');
+        await loadPlan(token);
+      } catch { showAlert('Upgrade failed', 'error'); }
+    }
+
+    async function loadSessions(token) {
+      try {
+        const res = await fetch('/api/auth/sessions', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error();
+        const sessions = await res.json();
+        if (!sessions.length) {
+          document.getElementById('active-sessions-list').innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem">No active sessions found.</p>';
+          return;
+        }
+        document.getElementById('active-sessions-list').innerHTML = sessions.map(s => `
+          <div class="device-row">
+            <div class="device-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></div>
+            <div class="device-info">
+              <div class="device-name">${s.device || s.browser || 'Unknown device'}</div>
+              <div class="device-meta">${s.ip || ''}${s.location ? ' · ' + s.location : ''} · Last active: ${s.lastActive || 'now'}</div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="revokeSession('${s.id}')">Log Out</button>
+          </div>
+        `).join('');
+      } catch {
+        document.getElementById('active-sessions-list').innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem">Could not load sessions.</p>';
+      }
+    }
+
+    async function revokeSession(sessionId) {
+      const token = await window.Clerk.session?.getToken();
+      if (!token) return;
+      try {
+        await fetch(`/api/auth/sessions/${sessionId}/revoke`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+        showAlert('Session revoked.', 'success');
+        await loadSessions(token);
+      } catch { showAlert('Failed to revoke session.', 'error'); }
+    }
+
+    async function revokeAllSessions() {
+      if (!confirm('Log out all devices?')) return;
+      const token = await window.Clerk.session?.getToken();
+      if (!token) return;
+      try {
+        await fetch('/api/auth/sessions/revoke-all', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+        showAlert('All other sessions revoked.', 'success');
+        await loadSessions(token);
+      } catch { showAlert('Failed to revoke sessions.', 'error'); }
+    }
+
+    async function loadApiKeys(token) {
+      try {
+        const res = await fetch('/api/auth/api-keys', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error();
+        const keys = await res.json();
+        if (!keys.length) {
+          document.getElementById('api-keys-list').innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem">No API keys generated yet.</p>';
+          return;
+        }
+        document.getElementById('api-keys-list').innerHTML = keys.map(k => `
+          <div class="api-key-row">
+            <div>
+              <div class="key-name">${k.name}</div>
+              <div class="key-preview">${k.key_preview || k.key?.slice(0, 12) + '...'}</div>
+            </div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">Created: ${formatDate(k.created_at)}</div>
+            <div class="key-actions">
+              <button class="btn btn-accent btn-sm" onclick="copyApiKey('${k.id}')">Copy</button>
+              <button class="btn btn-danger btn-sm" onclick="revokeApiKey('${k.id}')">Revoke</button>
+            </div>
+          </div>
+        `).join('');
+        if (keys[0]?.last_used) document.getElementById('api-last-used').textContent = formatDate(keys[0].last_used);
+      } catch { document.getElementById('api-keys-list').innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem">Could not load API keys.</p>'; }
+    }
+
+    async function generateApiKey() {
+      const name = prompt('Enter a name for this API key:');
+      if (!name) return;
+      const token = await window.Clerk.session?.getToken();
+      if (!token) return;
+      try {
+        const res = await fetch('/api/auth/api-keys', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        if (!res.ok) throw new Error();
+        const key = await res.json();
+        alert(`API key generated!\n\nKey: ${key.key}\n\nCopy this now — you won't see it again.`);
+        await loadApiKeys(token);
+      } catch { showAlert('Failed to generate API key.', 'error'); }
+    }
+
+    async function revokeApiKey(keyId) {
+      if (!confirm('Revoke this API key? This cannot be undone.')) return;
+      const token = await window.Clerk.session?.getToken();
+      if (!token) return;
+      try {
+        await fetch(`/api/auth/api-keys/${keyId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+        showAlert('API key revoked.', 'success');
+        await loadApiKeys(token);
+      } catch { showAlert('Failed to revoke key.', 'error'); }
+    }
+
+    async function copyApiKey(keyId) {
+      const token = await window.Clerk.session?.getToken();
+      if (!token) return;
+      try {
+        const res = await fetch(`/api/auth/api-keys/${keyId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        await navigator.clipboard.writeText(data.key);
+        showAlert('API key copied to clipboard.', 'success');
+      } catch { showAlert('Failed to copy key.', 'error'); }
+    }
+
+    async function loadNotifPrefs(token) {
+      try {
+        const res = await fetch('/api/auth/notifications', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+          const data = await res.json();
+          notifPrefs = { ...NOTIF_PREFS_DEFAULT, ...data };
+        }
+      } catch {}
+
+      const emailPrefs = [
+        { id: 'email_backtest_completed', label: 'Backtest completed' },
+        { id: 'email_bot_error', label: 'Bot error' },
+        { id: 'email_daily_summary', label: 'Daily summary' },
+        { id: 'email_weekly_report', label: 'Weekly performance report' }
+      ];
+
+      const inappPrefs = [
+        { id: 'inapp_backtest_completed', label: 'Backtest completed' },
+        { id: 'inapp_bot_error', label: 'Bot error' },
+        { id: 'inapp_updates', label: 'Product updates' }
+      ];
+
+      document.getElementById('email-notif-prefs').innerHTML = emailPrefs.map(p => `
+        <div class="info-row">
+          <span class="label">${p.label}</span>
+          <label class="toggle-switch">
+            <input type="checkbox" ${notifPrefs[p.id] ? 'checked' : ''} onchange="notifPrefs['${p.id}']=this.checked">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      `).join('');
+
+      document.getElementById('inapp-notif-prefs').innerHTML = inappPrefs.map(p => `
+        <div class="info-row">
+          <span class="label">${p.label}</span>
+          <label class="toggle-switch">
+            <input type="checkbox" ${notifPrefs[p.id] ? 'checked' : ''} onchange="notifPrefs['${p.id}']=this.checked">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      `).join('');
+    }
+
+    async function saveNotifPrefs() {
+      const token = await window.Clerk.session?.getToken();
+      if (!token) return;
+      try {
+        const res = await fetch('/api/auth/notifications', {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(notifPrefs)
+        });
+        if (!res.ok) throw new Error();
+        const saved = document.getElementById('notif-saved');
+        saved.style.display = 'block';
+        setTimeout(() => saved.style.display = 'none', 3000);
+      } catch { showAlert('Failed to save notification settings.', 'error'); }
+    }
+
+    async function loadConnectedAccounts(user) {
+      const providers = [
+        { id: 'google', name: 'Google', color: '#EA4335', connected: false },
+        { id: 'facebook', name: 'Facebook', color: '#1877F2', connected: false },
+        { id: 'discord', name: 'Discord', color: '#5865F2', connected: false },
+        { id: 'apple', name: 'Apple', color: '#000', connected: false },
+        { id: 'microsoft', name: 'Microsoft', color: '#00A4EF', connected: false }
+      ];
+
+      const externalAccounts = user.externalAccounts || [];
+      providers.forEach(p => {
+        p.connected = externalAccounts.some(ea => ea.provider?.toLowerCase().includes(p.id));
+      });
+
+      document.getElementById('connected-accounts-list').innerHTML = providers.map(p => `
+        <div class="connected-account-row">
+          <div class="connected-account-left">
+            <div class="provider-icon" style="background:${p.color}">${p.name[0]}</div>
+            <span style="font-weight:500;font-size:0.9rem">${p.name}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="status-badge ${p.connected ? 'status-connected' : 'status-disconnected'}">${p.connected ? 'Connected' : 'Not connected'}</span>
+            ${p.connected
+              ? `<button class="btn btn-danger btn-sm" onclick="window.Clerk.openUserProfile()">Disconnect</button>`
+              : `<button class="btn btn-accent btn-sm" onclick="window.Clerk.openUserProfile()">Connect</button>`}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function confirmDeleteAccount() {
+      if (!confirm('Are you sure you want to DELETE your account? This cannot be undone.')) return;
+      if (!confirm('This will permanently remove all your bots, backtests, and data. Continue?')) return;
+      (async () => {
+        const token = await window.Clerk.session?.getToken();
+        if (!token) return;
+        try {
+          const res = await fetch('/api/auth/account', { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+          if (!res.ok) throw new Error();
+          localStorage.clear();
+          window.Clerk.signOut();
+          window.location.href = 'index.html';
+        } catch { showAlert('Failed to delete account.', 'error'); }
+      })();
+    }
+
+    function confirmResetAccount() {
+      if (!confirm('Reset all bots and backtests? Your account and profile will remain.')) return;
+      (async () => {
+        const token = await window.Clerk.session?.getToken();
+        if (!token) return;
+        try {
+          const res = await fetch('/api/auth/account/reset', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+          if (!res.ok) throw new Error();
+          showAlert('Account reset successfully.', 'success');
+        } catch { showAlert('Failed to reset account.', 'error'); }
+      })();
+    }
+  </script>
+</body>
+</html>

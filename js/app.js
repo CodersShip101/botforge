@@ -263,6 +263,87 @@ async function upgradePlan(plan) {
   throw new Error('Backend unavailable');
 }
 
+function renderProfileDropdown() {
+  if (!window.Clerk?.user) return;
+  const navLinks = document.querySelector('.nav-links');
+  if (!navLinks || document.getElementById('profile-dropdown')) return;
+
+  const user = window.Clerk.user;
+  const name = user.fullName || user.username || user.primaryEmailAddress?.emailAddress?.split('@')[0] || 'User';
+  const email = user.primaryEmailAddress?.emailAddress || '';
+  const avatarUrl = user.imageUrl || '';
+  const initial = (user.fullName || user.username || email || 'U')[0].toUpperCase();
+
+  const dropdownHTML = `
+    <div class="profile-dropdown" id="profile-dropdown">
+      <button class="profile-trigger" onclick="toggleProfileDropdown()">
+        ${avatarUrl ? `<img src="${avatarUrl}" alt="" class="profile-avatar-img">` : `<div class="profile-avatar-letter">${initial}</div>`}
+      </button>
+      <div class="profile-menu" id="profile-menu">
+        <div class="profile-menu-header">
+          ${avatarUrl ? `<img src="${avatarUrl}" alt="" class="profile-menu-avatar">` : `<div class="profile-menu-avatar-letter">${initial}</div>`}
+          <div class="profile-menu-user">
+            <div class="profile-menu-name">${name}</div>
+            <div class="profile-menu-email">${email}</div>
+          </div>
+        </div>
+        <div class="profile-menu-plan" id="profile-menu-plan">Free</div>
+        <div class="profile-menu-items">
+          <a href="account.html" class="profile-menu-item" onclick="closeProfileDropdown()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            My Account</a>
+          <a href="account.html?tab=billing" class="profile-menu-item" onclick="closeProfileDropdown()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Billing & Plan</a>
+          <a href="account.html?tab=api-keys" class="profile-menu-item" onclick="closeProfileDropdown()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            API Keys</a>
+          <a href="account.html?tab=devices" class="profile-menu-item" onclick="closeProfileDropdown()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+            My Devices</a>
+          <a href="account.html?tab=security" class="profile-menu-item" onclick="closeProfileDropdown()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Security</a>
+          <div class="profile-menu-divider"></div>
+          <button class="profile-menu-item" onclick="signOut()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign Out</a>
+        </div>
+      </div>
+    </div>
+  `;
+
+  navLinks.insertAdjacentHTML('beforeend', dropdownHTML);
+
+  getPlan().then(p => {
+    const planEl = document.getElementById('profile-menu-plan');
+    if (planEl && p) planEl.textContent = capitalize(p.plan || 'Free');
+  }).catch(() => {});
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#profile-dropdown')) closeProfileDropdown();
+  });
+}
+
+function toggleProfileDropdown() {
+  const menu = document.getElementById('profile-menu');
+  if (menu) menu.classList.toggle('show');
+}
+
+function closeProfileDropdown() {
+  const menu = document.getElementById('profile-menu');
+  if (menu) menu.classList.remove('show');
+}
+
+function signOut() {
+  if (window.Clerk) {
+    window.Clerk.signOut();
+  }
+  localStorage.removeItem('vantis_token');
+  localStorage.removeItem('vantis_user');
+  window.location.href = 'index.html';
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   checkBackend().then(online => {
     if (!online && isAuthenticated() && !window.location.pathname.includes('login') && !window.location.pathname.includes('register')) {

@@ -180,7 +180,23 @@ async function init() {
   addCol('users', 'reset_token TEXT');
   addCol('users', 'reset_token_expires DATETIME');
   addCol('users', 'plan_updated_at DATETIME');
+  addCol('users', 'notification_prefs TEXT DEFAULT \'{}\'');
+  addCol('users', 'last_login_at DATETIME');
+  addCol('users', 'last_login_ip TEXT');
   addCol('bots', "status TEXT NOT NULL DEFAULT 'draft'");
+
+  sqlDb.exec(`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      key_hash TEXT NOT NULL,
+      key_preview TEXT NOT NULL,
+      last_used DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_api_keys_user_id ON api_keys(user_id);
+  `);
 }
 
 function save() {
