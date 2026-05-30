@@ -176,8 +176,10 @@ async function init() {
   addCol('users', 'locked_until DATETIME');
   addCol('users', 'clerk_id TEXT');
   addCol('users', 'verification_token TEXT');
+  addCol('users', 'verification_token_expires DATETIME');
   addCol('users', 'reset_token TEXT');
   addCol('users', 'reset_token_expires DATETIME');
+  addCol('users', 'plan_updated_at DATETIME');
   addCol('bots', "status TEXT NOT NULL DEFAULT 'draft'");
 }
 

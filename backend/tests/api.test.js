@@ -35,7 +35,7 @@ describe('Auth API', () => {
   test('POST /api/auth/register - creates account', async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ email: testEmail, username: 'testuser', password: 'testpass123' });
+      .send({ email: testEmail, username: 'testuser', password: 'testpass123', confirmPassword: 'testpass123' });
     expect(res.status).toBe(201);
     expect(res.body.user.email).toBe(testEmail);
     expect(res.body.token).toBeDefined();
@@ -45,7 +45,7 @@ describe('Auth API', () => {
   test('POST /api/auth/register - rejects duplicate email', async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ email: testEmail, username: 'testuser2', password: 'testpass123' });
+      .send({ email: testEmail, username: 'testuser2', password: 'testpass123', confirmPassword: 'testpass123' });
     expect(res.status).toBe(400);
   });
 
