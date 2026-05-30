@@ -8,12 +8,25 @@ jest.mock('@clerk/backend', () => ({
     users: {
       getUser: jest.fn(() => Promise.resolve({
         emailAddresses: [{ emailAddress: 'test-user@test.com' }],
-        username: 'testuser'
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
+        imageUrl: '',
+        passwordEnabled: true,
+        twoFactorEnabled: false,
+        externalAccounts: []
       })),
-      getUserSessionList: jest.fn(() => Promise.resolve([]))
+      getUserSessionList: jest.fn(() => Promise.resolve([])),
+      updateUser: jest.fn(() => Promise.resolve({})),
+      verifyPassword: jest.fn(() => Promise.resolve({ verified: true })),
+      createTOTP: jest.fn(() => Promise.resolve({ qrCodeUrl: 'otpauth://totp/test', secret: 'TEST', uri: 'otpauth://totp/test' })),
+      disableTOTP: jest.fn(() => Promise.resolve({})),
+      deleteUser: jest.fn(() => Promise.resolve({})),
+      unlinkExternalAccount: jest.fn(() => Promise.resolve({}))
     },
     sessions: {
-      revoke: jest.fn(() => Promise.resolve())
+      revoke: jest.fn(() => Promise.resolve()),
+      getUserSessions: jest.fn(() => Promise.resolve([]))
     },
     verifyToken: jest.fn(() => Promise.resolve({ sub: 'test_clerk_user_123', sid: 'test_session' }))
   })),
@@ -33,12 +46,25 @@ jest.mock('@clerk/express', () => ({
     users: {
       getUser: jest.fn(() => Promise.resolve({
         emailAddresses: [{ emailAddress: 'test-user@test.com' }],
-        username: 'testuser'
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
+        imageUrl: '',
+        passwordEnabled: true,
+        twoFactorEnabled: false,
+        externalAccounts: []
       })),
-      getUserSessionList: jest.fn(() => Promise.resolve([]))
+      getUserSessionList: jest.fn(() => Promise.resolve([])),
+      updateUser: jest.fn(() => Promise.resolve({})),
+      verifyPassword: jest.fn(() => Promise.resolve({ verified: true })),
+      createTOTP: jest.fn(() => Promise.resolve({ qrCodeUrl: 'otpauth://totp/test', secret: 'TEST', uri: 'otpauth://totp/test' })),
+      disableTOTP: jest.fn(() => Promise.resolve({})),
+      deleteUser: jest.fn(() => Promise.resolve({})),
+      unlinkExternalAccount: jest.fn(() => Promise.resolve({}))
     },
     sessions: {
-      revoke: jest.fn(() => Promise.resolve())
+      revoke: jest.fn(() => Promise.resolve()),
+      getUserSessions: jest.fn(() => Promise.resolve([]))
     }
   }
 }));
@@ -81,27 +107,27 @@ describe('Auth API', () => {
     expect(res.body.plan).toBe('free');
   });
 
-  test('GET /api/auth/plan - returns plan', async () => {
+  test('GET /api/account/plan - returns plan', async () => {
     const res = await request(app)
-      .get('/api/auth/plan')
+      .get('/api/account/plan')
       .set('Authorization', `Bearer ${testToken}`);
     expect(res.status).toBe(200);
     expect(res.body.plan).toBeDefined();
     expect(res.body.limits).toBeDefined();
   });
 
-  test('POST /api/auth/plan/upgrade - upgrades plan', async () => {
+  test('POST /api/account/plan/upgrade - upgrades plan', async () => {
     const res = await request(app)
-      .post('/api/auth/plan/upgrade')
+      .post('/api/account/plan/upgrade')
       .set('Authorization', `Bearer ${testToken}`)
       .send({ plan: 'pro' });
     expect(res.status).toBe(200);
     expect(res.body.message).toContain('pro');
   });
 
-  test('GET /api/auth/plan - reflects upgraded plan', async () => {
+  test('GET /api/account/plan - reflects upgraded plan', async () => {
     const res = await request(app)
-      .get('/api/auth/plan')
+      .get('/api/account/plan')
       .set('Authorization', `Bearer ${testToken}`);
     expect(res.status).toBe(200);
     expect(res.body.plan).toBe('pro');

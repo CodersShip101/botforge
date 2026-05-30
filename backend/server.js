@@ -8,7 +8,6 @@ const { clerkMiddleware } = require('@clerk/express');
 const db = require('./config/database');
 const botRoutes = require('./routes/bots');
 const { clerkAuth } = require('./middleware/clerk');
-const { PLAN_LIMITS } = require('./middleware/planLimit');
 
 const app = express();
 
@@ -61,36 +60,7 @@ app.use('/api/bots', clerkAuth, require('./routes/versions'));
 app.use('/api/backtests', clerkAuth, require('./routes/backtests'));
 app.use('/api/ai', clerkAuth, require('./routes/ai'));
 
-app.get('/api/auth/plan', clerkAuth, async (req, res) => {
-  try {
-    const user = db.prepare('SELECT plan FROM users WHERE id = ?').get(req.user.userId);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    const limits = PLAN_LIMITS[user.plan] || PLAN_LIMITS.free;
-    const botCount = db.prepare('SELECT COUNT(*) AS cnt FROM bots WHERE user_id = ?').get(req.user.userId);
-    const backtestCount = db.prepare("SELECT COUNT(*) AS cnt FROM backtests WHERE user_id = ? AND date(created_at) = date('now')").get(req.user.userId);
-    res.json({ plan: user.plan, limits, usage: { bots: botCount.cnt, backtestsToday: backtestCount.cnt } });
-  } catch (err) {
-    console.error('Get plan error:', err);
-    res.status(500).json({ error: 'Failed to fetch plan' });
-  }
-});
-
-app.post('/api/auth/plan/upgrade', clerkAuth, async (req, res) => {
-  try {
-    const { plan } = req.body;
-    const validPlans = ['free', 'pro', 'elite'];
-    if (!validPlans.includes(plan)) {
-      return res.status(400).json({ error: 'Invalid plan. Must be: free, pro, or elite.' });
-    }
-    db.prepare("UPDATE users SET plan = ?, plan_updated_at = datetime('now') WHERE id = ?").run(plan, req.user.userId);
-    res.json({ message: `Plan upgraded to ${plan}` });
-  } catch (err) {
-    console.error('Upgrade plan error:', err);
-    res.status(500).json({ error: 'Failed to upgrade plan' });
-  }
-});
-
-app.use('/api/auth', clerkAuth, require('./routes/account'));
+app.use('/api/account', clerkAuth, require('./routes/account'));
 
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);

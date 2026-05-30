@@ -251,14 +251,14 @@ async function getBacktests(botId) {
 
 async function getPlan() {
   if (isAuthenticated() && backendOnline !== false) {
-    try { return await fetchAPI('/auth/plan'); } catch (e) { /* fall through */ }
+    try { return await fetchAPI('/account/plan'); } catch (e) { /* fall through */ }
   }
   return null;
 }
 
 async function upgradePlan(plan) {
   if (isAuthenticated() && backendOnline !== false) {
-    try { return await fetchAPI('/auth/plan/upgrade', 'POST', { plan }); } catch (e) { throw e; }
+    try { return await fetchAPI('/account/plan/upgrade', 'POST', { plan }); } catch (e) { throw e; }
   }
   throw new Error('Backend unavailable');
 }
