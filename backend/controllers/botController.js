@@ -4,7 +4,7 @@ const codeGenerator = require('../services/codeGenerator');
 exports.createBot = async (req, res) => {
   try {
     const { name, description, configuration } = req.body;
-    const userId = req.userId;
+    const userId = req.user.userId;
 
     if (!name || !configuration) {
       return res.status(400).json({ error: 'Name and configuration are required' });
@@ -26,7 +26,7 @@ exports.createBot = async (req, res) => {
 
 exports.getUserBots = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.user.userId;
 
     const bots = db.prepare('SELECT * FROM bots WHERE user_id = ? ORDER BY created_at DESC').all(userId);
 
@@ -43,7 +43,7 @@ exports.getUserBots = async (req, res) => {
 exports.getBot = async (req, res) => {
   try {
     const { botId } = req.params;
-    const userId = req.userId;
+    const userId = req.user.userId;
 
     const bot = db.prepare('SELECT * FROM bots WHERE id = ? AND user_id = ?').get(botId, userId);
 
@@ -63,7 +63,7 @@ exports.getBot = async (req, res) => {
 exports.updateBot = async (req, res) => {
   try {
     const { botId } = req.params;
-    const userId = req.userId;
+    const userId = req.user.userId;
     const { name, description, configuration } = req.body;
 
     if (!name) {
@@ -91,7 +91,7 @@ exports.updateBot = async (req, res) => {
 exports.deleteBot = async (req, res) => {
   try {
     const { botId } = req.params;
-    const userId = req.userId;
+    const userId = req.user.userId;
 
     const info = db.prepare('DELETE FROM bots WHERE id = ? AND user_id = ?').run(botId, userId);
 
@@ -109,7 +109,7 @@ exports.deleteBot = async (req, res) => {
 exports.downloadBot = async (req, res) => {
   try {
     const { botId } = req.params;
-    const userId = req.userId;
+    const userId = req.user.userId;
     const platform = req.query.platform || 'mt4';
 
     if (platform !== 'mt4' && platform !== 'mt5') {

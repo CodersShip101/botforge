@@ -1,20 +1,17 @@
 const API_BASE = '/api';
 let backendOnline = null;
 
-function getToken() {
+async function getClerkToken() {
+  try {
+    if (window.Clerk?.session) {
+      return await window.Clerk.session.getToken();
+    }
+  } catch {}
   return localStorage.getItem('vantis_token') || null;
 }
 
 function isAuthenticated() {
-  return !!localStorage.getItem('vantis_token');
-}
-
-function getCurrentUser() {
-  try {
-    return JSON.parse(localStorage.getItem('vantis_user') || 'null');
-  } catch {
-    return null;
-  }
+  return !!(window.Clerk?.user || localStorage.getItem('vantis_token'));
 }
 
 async function checkBackend() {
@@ -28,7 +25,7 @@ async function checkBackend() {
 }
 
 async function fetchAPI(path, method = 'GET', body = null) {
-  const token = getToken();
+  const token = await getClerkToken();
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -141,6 +138,14 @@ const Storage = {
     };
   }
 };
+
+(async function migrateKeys() {
+  const oldBots = localStorage.getItem('botforge_bots');
+  if (oldBots && !localStorage.getItem('vantis_bots')) {
+    localStorage.setItem('vantis_bots', oldBots);
+  }
+  ['botforge_bots', 'token', 'access_token', 'refresh_token'].forEach(k => localStorage.removeItem(k));
+})();
 
 async function getBots() {
   if (isAuthenticated() && backendOnline !== false) {
@@ -258,19 +263,6 @@ async function upgradePlan(plan) {
   throw new Error('Backend unavailable');
 }
 
-// Migrate old localStorage keys
-(function migrateKeys() {
-  const oldBots = localStorage.getItem('botforge_bots');
-  if (oldBots && !localStorage.getItem('vantis_bots')) {
-    localStorage.setItem('vantis_bots', oldBots);
-  }
-  const oldSession = localStorage.getItem('clerk_session');
-  if (oldSession && !localStorage.getItem('vantis_token')) {
-    localStorage.setItem('vantis_token', oldSession);
-  }
-  ['botforge_bots', 'clerk_session', 'token', 'access_token', 'refresh_token'].forEach(k => localStorage.removeItem(k));
-})();
-
 document.addEventListener('DOMContentLoaded', async () => {
   checkBackend().then(online => {
     if (!online && isAuthenticated() && !window.location.pathname.includes('login') && !window.location.pathname.includes('register')) {
@@ -281,19 +273,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   const path = window.location.pathname.split('/').pop() || 'index.html';
   if (path === 'builder.html' && typeof initBuilder === 'function') initBuilder();
   if (path === 'dashboard.html' && typeof initDashboard === 'function') initDashboard();
-
-  const nav = document.querySelector('.nav-links');
-  if (nav) {
-    const user = getCurrentUser();
-    if (user) {
-      const existingBtns = nav.querySelectorAll('.btn-signin, .btn-getstarted');
-      existingBtns.forEach(b => b.remove());
-
-      const userMenu = document.createElement('a');
-      userMenu.href = 'account-settings.html';
-      userMenu.textContent = user.username || user.email || 'Account';
-      userMenu.style.opacity = '0.8';
-      nav.appendChild(userMenu);
-    }
-  }
 });

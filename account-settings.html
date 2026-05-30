@@ -34,23 +34,14 @@
     .danger-zone { border:1px solid var(--red);border-radius:var(--radius);padding:24px;margin-top:24px }
     .danger-zone h3 { color:var(--red);margin-bottom:8px;font-size:1.1rem }
     .danger-zone p { color:var(--text-muted);font-size:0.85rem;margin-bottom:16px }
-    .form-group { margin-bottom:16px }
-    .form-group label { display:block;font-size:0.85rem;font-weight:500;margin-bottom:4px;color:var(--text-muted) }
-    .form-group input { width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:0.9rem;outline:none;transition:border .2s;box-sizing:border-box }
-    .form-group input:focus { border-color:var(--accent) }
     .btn { padding:10px 20px;border-radius:8px;border:none;font-family:inherit;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-block;text-decoration:none }
     .btn-primary { background:var(--accent);color:#fff }
     .btn-primary:hover { filter:brightness(1.15) }
     .btn-danger { background:var(--red);color:#fff }
     .btn-danger:hover { filter:brightness(1.15) }
     .btn-sm { padding:6px 14px;font-size:0.8rem }
-    .oauth-item { display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px }
-    .oauth-item .provider-info { display:flex;align-items:center;gap:10px }
-    .oauth-item .provider-info img { width:24px;height:24px;border-radius:50% }
-    .oauth-item .provider-info .name { font-weight:500 }
-    .oauth-item .provider-info .email { font-size:0.8rem;color:var(--text-muted) }
-    .auth-error { background:rgba(255,59,59,0.1);border:1px solid var(--red);border-radius:8px;padding:10px 14px;color:var(--red);font-size:0.85rem;margin-bottom:16px;display:none }
-    .auth-success { background:rgba(0,255,138,0.1);border:1px solid var(--green);border-radius:8px;padding:10px 14px;color:var(--green);font-size:0.85rem;margin-bottom:16px;display:none }
+    .clerk-user-button { display:flex;justify-content:center;margin:20px 0 }
+    #clerk-user-button .cl-userButtonPopoverCard { background:var(--bg-card);border:1px solid var(--border) }
   </style>
 </head>
 <body>
@@ -66,57 +57,47 @@
   </nav>
 
   <div class="container" id="app">
-    <div style="text-align:center;margin:60px auto;max-width:480px" id="offlineMsg">
-      <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:8px">Account Settings</h1>
-      <p style="color:var(--text-muted);margin-bottom:24px">Please sign in to manage your account.</p>
-      <a href="login.html" class="btn btn-primary">Sign In</a>
+    <div style="text-align:center;margin:60px auto;max-width:480px" id="loadingMsg">
+      <p style="color:var(--text-muted)">Loading account settings...</p>
     </div>
 
     <div class="settings-layout" id="settingsLayout" style="display:none">
       <nav class="settings-nav">
         <a href="#" class="active" data-section="profile">Profile</a>
         <a href="#" data-section="plans">Plans & Billing</a>
-        <a href="#" data-section="oauth">Connected Accounts</a>
         <a href="#" data-section="danger">Danger Zone</a>
       </nav>
 
       <div>
         <div class="settings-section active" id="section-profile">
           <h2>Profile</h2>
-          <p class="sub">Your account information</p>
-          <div class="auth-success" id="profileSuccess" style="display:none"></div>
+          <p class="sub">Your account is managed by Clerk</p>
           <div id="profileInfo"></div>
-          <div style="margin-top:16px">
-            <button class="btn btn-primary btn-sm" onclick="logout()">Sign Out</button>
-          </div>
+          <div class="clerk-user-button" id="clerk-user-button"></div>
         </div>
 
         <div class="settings-section" id="section-plans">
           <h2>Plans & Billing</h2>
           <p class="sub">Choose the plan that fits your needs</p>
-          <div class="auth-success" id="planSuccess" style="display:none"></div>
           <div class="plans-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px" id="plansGrid"></div>
-        </div>
-
-        <div class="settings-section" id="section-oauth">
-          <h2>Connected Accounts</h2>
-          <p class="sub">Link your Google or Facebook account for easy sign-in</p>
-          <div class="auth-error" id="oauthError" style="display:none"></div>
-          <div class="auth-success" id="oauthSuccess" style="display:none"></div>
-          <div id="oauthList"></div>
         </div>
 
         <div class="settings-section" id="section-danger">
           <div class="danger-zone">
             <h3>Danger Zone</h3>
-            <p>Once you delete your account, there is no going back. All bots, backtests, and data will be permanently removed.</p>
-            <button class="btn btn-danger" id="deleteAccountBtn" onclick="deleteAccount()">Delete Account</button>
+            <p>Manage your account through Clerk's account portal.</p>
+            <button class="btn btn-danger" id="manageAccountBtn">Manage Account</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  <script
+    data-clerk-publishable-key="pk_test_cmVzdGVkLWhhcmUtMzUuY2xlcmsuYWNjb3VudHMuZGV2JA"
+    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+    crossorigin="anonymous"
+  ></script>
   <script src="js/app.js"></script>
   <script>
     const PLANS = [
@@ -126,36 +107,61 @@
     ];
 
     async function loadSettings() {
-      if (!isAuthenticated()) {
-        document.getElementById('offlineMsg').style.display = '';
-        document.getElementById('settingsLayout').style.display = 'none';
+      const loadingMsg = document.getElementById('loadingMsg');
+      const settingsLayout = document.getElementById('settingsLayout');
+
+      try {
+        await window.Clerk.load();
+      } catch {
+        loadingMsg.innerHTML = '<p style="color:var(--text-muted)">Please <a href="login.html" style="color:var(--accent)">sign in</a> to manage your account.</p>';
         return;
       }
-      document.getElementById('offlineMsg').style.display = 'none';
-      document.getElementById('settingsLayout').style.display = '';
-      await loadProfile();
-      await loadPlans();
-      await loadOAuth();
-    }
 
-    async function loadProfile() {
-      try {
-        const data = await fetchAPI('/auth/me', 'GET');
-        const user = data.user;
-        document.getElementById('profileInfo').innerHTML = `
-          <div class="info-row"><span class="label">Username</span><span class="value">${escapeHtml(user.username)}</span></div>
-          <div class="info-row"><span class="label">Email</span><span class="value">${escapeHtml(user.email)}</span></div>
-          <div class="info-row"><span class="label">Email Verified</span><span class="value">${user.is_verified ? 'Yes' : 'No'}</span></div>
-          <div class="info-row"><span class="label">Member Since</span><span class="value">${formatDate(user.created_at)}</span></div>
-        `;
-      } catch (err) {
-        document.getElementById('profileInfo').innerHTML = `<div class="auth-error" style="display:block">${err.message}</div>`;
+      if (!window.Clerk.user) {
+        window.location.href = 'login.html';
+        return;
       }
+
+      const token = await window.Clerk.session?.getToken();
+      if (!token) { loadingMsg.innerHTML = '<p>Session error. Please refresh.</p>'; return; }
+
+      localStorage.setItem('vantis_token', token);
+      const user = window.Clerk.user;
+      localStorage.setItem('vantis_user', JSON.stringify({ id: user.id, email: user.primaryEmailAddress?.emailAddress, username: user.username }));
+
+      loadingMsg.style.display = 'none';
+      settingsLayout.style.display = '';
+
+      document.getElementById('profileInfo').innerHTML = `
+        <div class="info-row"><span class="label">Username</span><span class="value">${user.username || 'Not set'}</span></div>
+        <div class="info-row"><span class="label">Email</span><span class="value">${user.primaryEmailAddress?.emailAddress || ''}</span></div>
+        <div class="info-row"><span class="label">Email Verified</span><span class="value">${user.primaryEmailAddress?.verification?.status === 'verified' ? 'Yes' : 'No'}</span></div>
+      `;
+
+      window.Clerk.mountUserButton(document.getElementById('clerk-user-button'), {
+        appearance: {
+          elements: {
+            userButtonPopoverCard: { background: 'var(--bg-card)', border: '1px solid var(--border)' },
+            userButtonPopoverActionButton: { color: 'var(--text)' },
+            userButtonPopoverActionButtonText: { color: 'var(--text)' },
+            userPreviewMainIdentifier: { color: 'var(--text)' },
+            userPreviewSecondaryIdentifier: { color: 'var(--text-muted)' },
+          }
+        }
+      });
+
+      document.getElementById('manageAccountBtn').addEventListener('click', () => {
+        window.Clerk.openUserProfile();
+      });
+
+      await loadPlans(token);
     }
 
-    async function loadPlans() {
+    async function loadPlans(token) {
       try {
-        const planData = await fetchAPI('/auth/plan', 'GET');
+        const res = await fetch('/api/auth/plan', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error('Failed');
+        const planData = await res.json();
         const currentPlan = planData.plan || 'free';
         document.getElementById('plansGrid').innerHTML = PLANS.map(p => `
           <div class="plan-card ${p.id === currentPlan ? 'selected' : ''}" onclick="upgradePlan('${p.id}')">
@@ -166,98 +172,21 @@
             ${p.id === currentPlan ? '<div style="margin-top:12px;text-align:center;font-size:0.8rem;color:var(--accent);font-weight:600">Current Plan</div>' : ''}
           </div>
         `).join('');
-      } catch (err) {
-        document.getElementById('plansGrid').innerHTML = `<div class="auth-error" style="display:block">${err.message}</div>`;
-      }
+      } catch { document.getElementById('plansGrid').innerHTML = '<p style="color:var(--text-muted)">Could not load plans.</p>'; }
     }
 
     async function upgradePlan(plan) {
+      const token = await window.Clerk.session?.getToken();
+      if (!token) return;
       try {
-        await fetchAPI('/auth/plan/upgrade', 'POST', { plan });
-        const el = document.getElementById('planSuccess');
-        el.textContent = `Plan upgraded to ${plan.charAt(0).toUpperCase() + plan.slice(1)}`;
-        el.style.display = 'block';
-        setTimeout(() => el.style.display = 'none', 3000);
-        await loadPlans();
-      } catch (err) {
-        const el = document.getElementById('planSuccess');
-        el.textContent = err.message;
-        el.style.display = 'block';
-        el.style.background = 'rgba(255,59,59,0.1)';
-        el.style.border = '1px solid var(--red)';
-        el.style.color = 'var(--red)';
-        setTimeout(() => { el.style.display = 'none'; el.style.background = ''; el.style.border = ''; el.style.color = ''; }, 3000);
-      }
-    }
-
-    async function loadOAuth() {
-      try {
-        const data = await fetchAPI('/auth/me', 'GET');
-        const accounts = data.user.oauthAccounts || [];
-        document.getElementById('oauthList').innerHTML = `
-          ${['google', 'facebook'].map(p => {
-            const acc = accounts.find(a => a.provider === p);
-            if (acc) {
-              return `
-                <div class="oauth-item">
-                  <div class="provider-info">
-                    <span style="font-size:1.2rem">${p === 'google' ? 'G' : 'f'}</span>
-                    <div>
-                      <div class="name">${escapeHtml(acc.name || p)}</div>
-                      <div class="email">${escapeHtml(acc.email || '')}</div>
-                    </div>
-                  </div>
-                  <button class="btn btn-danger btn-sm" onclick="unlinkOAuth('${p}')">Unlink</button>
-                </div>
-              `;
-            }
-            return `
-              <div class="oauth-item">
-                <div class="provider-info">
-                  <span style="font-size:1.2rem">${p === 'google' ? 'G' : 'f'}</span>
-                  <div>
-                    <div class="name">${p.charAt(0).toUpperCase() + p.slice(1)}</div>
-                    <div class="email">Not connected</div>
-                  </div>
-                </div>
-                <a href="/api/auth/oauth/${p}" class="btn btn-primary btn-sm">Link</a>
-              </div>
-            `;
-          }).join('')}
-        `;
-      } catch (err) {
-        document.getElementById('oauthList').innerHTML = `<div class="auth-error" style="display:block">${err.message}</div>`;
-      }
-    }
-
-    async function unlinkOAuth(provider) {
-      if (!confirm(`Unlink your ${provider} account?`)) return;
-      try {
-        await fetchAPI(`/auth/oauth/${provider}`, 'DELETE');
-        document.getElementById('oauthSuccess').textContent = `${provider} account unlinked`;
-        document.getElementById('oauthSuccess').style.display = 'block';
-        setTimeout(() => document.getElementById('oauthSuccess').style.display = 'none', 3000);
-        await loadOAuth();
-      } catch (err) {
-        document.getElementById('oauthError').textContent = err.message;
-        document.getElementById('oauthError').style.display = 'block';
-        setTimeout(() => document.getElementById('oauthError').style.display = 'none', 3000);
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem('vantis_token');
-      localStorage.removeItem('vantis_user');
-      window.location.href = 'login.html';
-    }
-
-    function deleteAccount() {
-      alert('Account deletion is not yet implemented. Contact support for assistance.');
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        const res = await fetch('/api/auth/plan/upgrade', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan })
+        });
+        if (!res.ok) throw new Error('Upgrade failed');
+        await loadPlans(token);
+      } catch {}
     }
 
     document.querySelectorAll('.settings-nav a').forEach(a => {

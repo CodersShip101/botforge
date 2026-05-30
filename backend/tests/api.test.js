@@ -3,11 +3,50 @@ const path = require('path');
 const db = require('../config/database');
 const request = require('supertest');
 
+jest.mock('@clerk/backend', () => ({
+  createClerkClient: jest.fn(() => ({
+    users: {
+      getUser: jest.fn(() => Promise.resolve({
+        emailAddresses: [{ emailAddress: 'test-user@test.com' }],
+        username: 'testuser'
+      })),
+      getUserSessionList: jest.fn(() => Promise.resolve([]))
+    },
+    sessions: {
+      revoke: jest.fn(() => Promise.resolve())
+    },
+    verifyToken: jest.fn(() => Promise.resolve({ sub: 'test_clerk_user_123', sid: 'test_session' }))
+  })),
+  verifyToken: jest.fn(() => Promise.resolve({ sub: 'test_clerk_user_123', sid: 'test_session' }))
+}));
+
+jest.mock('@clerk/express', () => ({
+  clerkMiddleware: jest.fn(() => (req, res, next) => {
+    if (req.headers?.authorization?.startsWith('Bearer ')) {
+      req.auth = { userId: 'test_clerk_user_123', sessionId: 'test_session' };
+    }
+    next();
+  }),
+  getAuth: jest.fn((req) => req.auth || {}),
+  requireAuth: jest.fn(() => (req, res, next) => next()),
+  clerkClient: {
+    users: {
+      getUser: jest.fn(() => Promise.resolve({
+        emailAddresses: [{ emailAddress: 'test-user@test.com' }],
+        username: 'testuser'
+      })),
+      getUserSessionList: jest.fn(() => Promise.resolve([]))
+    },
+    sessions: {
+      revoke: jest.fn(() => Promise.resolve())
+    }
+  }
+}));
+
 const app = require('../server');
 
-let testToken = null;
+let testToken = 'mock_jwt_token_xyz';
 let testBotId = null;
-const testEmail = `test-${Date.now()}@test.com`;
 
 beforeAll(async () => {
   const dbPath = path.join(__dirname, '..', 'data', 'botforge.db');
@@ -32,52 +71,14 @@ afterAll(() => {
 });
 
 describe('Auth API', () => {
-  test('POST /api/auth/register - creates account', async () => {
+  test('POST /api/auth/sync - syncs Clerk user', async () => {
     const res = await request(app)
-      .post('/api/auth/register')
-      .send({ email: testEmail, username: 'testuser', password: 'testpass123', confirmPassword: 'testpass123' });
-    expect(res.status).toBe(201);
-    expect(res.body.user.email).toBe(testEmail);
-    expect(res.body.token).toBeDefined();
-    testToken = res.body.token;
-  });
-
-  test('POST /api/auth/register - rejects duplicate email', async () => {
-    const res = await request(app)
-      .post('/api/auth/register')
-      .send({ email: testEmail, username: 'testuser2', password: 'testpass123', confirmPassword: 'testpass123' });
-    expect(res.status).toBe(400);
-  });
-
-  test('POST /api/auth/login - logs in with valid credentials', async () => {
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({ email: testEmail, password: 'testpass123' });
+      .post('/api/auth/sync')
+      .set('Authorization', `Bearer ${testToken}`)
+      .send({ userId: 'test_clerk_user_123', email: 'test-user@test.com', username: 'testuser' });
     expect(res.status).toBe(200);
-    expect(res.body.token).toBeDefined();
-    expect(res.body.user.email).toBe(testEmail);
-    testToken = res.body.token;
-  });
-
-  test('POST /api/auth/login - rejects wrong password', async () => {
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({ email: testEmail, password: 'wrongpass' });
-    expect(res.status).toBe(401);
-  });
-
-  test('GET /api/auth/me - returns current user', async () => {
-    const res = await request(app)
-      .get('/api/auth/me')
-      .set('Authorization', `Bearer ${testToken}`);
-    expect(res.status).toBe(200);
-    expect(res.body.user.email).toBe(testEmail);
-  });
-
-  test('GET /api/auth/me - rejects without auth', async () => {
-    const res = await request(app)
-      .get('/api/auth/me');
-    expect(res.status).toBe(401);
+    expect(res.body.email).toBe('test-user@test.com');
+    expect(res.body.plan).toBe('free');
   });
 
   test('GET /api/auth/plan - returns plan', async () => {
