@@ -3,7 +3,7 @@ const db = require('../config/database');
 exports.saveVersion = async (req, res) => {
   try {
     const { botId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.userId;
 
     const bot = db.prepare('SELECT * FROM bots WHERE id = ? AND user_id = ?').get(botId, userId);
     if (!bot) return res.status(404).json({ error: 'Bot not found' });
@@ -25,7 +25,7 @@ exports.saveVersion = async (req, res) => {
 exports.autosave = async (req, res) => {
   try {
     const { botId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.userId;
     const { name, description, configuration } = req.body;
 
     const bot = db.prepare('SELECT * FROM bots WHERE id = ? AND user_id = ?').get(botId, userId);
@@ -48,7 +48,7 @@ exports.autosave = async (req, res) => {
 exports.getVersions = async (req, res) => {
   try {
     const { botId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.userId;
 
     const bot = db.prepare('SELECT id FROM bots WHERE id = ? AND user_id = ?').get(botId, userId);
     if (!bot) return res.status(404).json({ error: 'Bot not found' });
@@ -64,7 +64,7 @@ exports.getVersions = async (req, res) => {
 exports.getVersion = async (req, res) => {
   try {
     const { botId, versionId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.userId;
 
     const bot = db.prepare('SELECT id FROM bots WHERE id = ? AND user_id = ?').get(botId, userId);
     if (!bot) return res.status(404).json({ error: 'Bot not found' });
@@ -83,7 +83,7 @@ exports.getVersion = async (req, res) => {
 exports.restoreVersion = async (req, res) => {
   try {
     const { botId, versionId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.userId;
 
     const ver = db.prepare(
       'SELECT v.* FROM bot_versions v JOIN bots b ON v.bot_id = b.id WHERE v.id = ? AND v.bot_id = ? AND b.user_id = ?'

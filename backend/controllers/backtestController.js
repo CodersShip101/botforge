@@ -3,7 +3,7 @@ const backtestEngine = require('../services/backtestEngine');
 
 exports.runBacktest = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.userId;
     const { botId, symbol, timeframe, dateStart, dateEnd } = req.body;
 
     if (!botId) return res.status(400).json({ error: 'botId is required' });
@@ -51,7 +51,7 @@ exports.runBacktest = async (req, res) => {
 exports.getBacktest = async (req, res) => {
   try {
     const { backtestId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.userId;
 
     const bt = db.prepare('SELECT * FROM backtests WHERE id = ? AND user_id = ?').get(backtestId, userId);
     if (!bt) return res.status(404).json({ error: 'Backtest not found' });
@@ -69,7 +69,7 @@ exports.getBacktest = async (req, res) => {
 exports.getBotBacktests = async (req, res) => {
   try {
     const { botId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.userId;
 
     const bot = db.prepare('SELECT id FROM bots WHERE id = ? AND user_id = ?').get(botId, userId);
     if (!bot) return res.status(404).json({ error: 'Bot not found' });

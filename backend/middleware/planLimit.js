@@ -12,7 +12,7 @@ function getUserPlan(userId) {
 }
 
 function checkBotLimit(req, res, next) {
-  const userId = req.user.userId;
+  const userId = req.userId;
   const plan = getUserPlan(userId);
   const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
 
@@ -26,7 +26,7 @@ function checkBotLimit(req, res, next) {
 }
 
 function checkBacktestLimit(req, res, next) {
-  const userId = req.user.userId;
+  const userId = req.userId;
   const plan = getUserPlan(userId);
   const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
 
@@ -42,7 +42,7 @@ function checkBacktestLimit(req, res, next) {
 }
 
 function requireAIGenerator(req, res, next) {
-  const userId = req.user.userId;
+  const userId = req.userId;
   const plan = getUserPlan(userId);
   const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
   if (!limits.aiGenerator) {
@@ -52,7 +52,7 @@ function requireAIGenerator(req, res, next) {
 }
 
 function requireAdvancedBacktesting(req, res, next) {
-  const userId = req.user.userId;
+  const userId = req.userId;
   const plan = getUserPlan(userId);
   const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
   if (!limits.advancedBacktesting) {

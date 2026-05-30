@@ -1,13 +1,20 @@
 const API_BASE = '/api';
 let backendOnline = null;
 
-// Offline mode — no external auth provider
-async function getClerkToken() {
-  return localStorage.getItem('clerk_session') || null;
+function getToken() {
+  return localStorage.getItem('vantis_token') || null;
 }
 
 function isAuthenticated() {
-  return !!localStorage.getItem('clerk_session');
+  return !!localStorage.getItem('vantis_token');
+}
+
+function getCurrentUser() {
+  try {
+    return JSON.parse(localStorage.getItem('vantis_user') || 'null');
+  } catch {
+    return null;
+  }
 }
 
 async function checkBackend() {
@@ -21,7 +28,7 @@ async function checkBackend() {
 }
 
 async function fetchAPI(path, method = 'GET', body = null) {
-  const token = await getClerkToken();
+  const token = getToken();
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -90,13 +97,12 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// localStorage fallback (offline mode)
 const Storage = {
   getBots() {
-    return JSON.parse(localStorage.getItem('botforge_bots') || '[]');
+    return JSON.parse(localStorage.getItem('vantis_bots') || '[]');
   },
   saveBots(bots) {
-    localStorage.setItem('botforge_bots', JSON.stringify(bots));
+    localStorage.setItem('vantis_bots', JSON.stringify(bots));
   },
   addBot(bot) {
     const bots = this.getBots();
@@ -252,10 +258,19 @@ async function upgradePlan(plan) {
   throw new Error('Backend unavailable');
 }
 
-// Clean up old localStorage keys from previous auth system
-['token', 'access_token', 'refresh_token'].forEach(k => localStorage.removeItem(k));
+// Migrate old localStorage keys
+(function migrateKeys() {
+  const oldBots = localStorage.getItem('botforge_bots');
+  if (oldBots && !localStorage.getItem('vantis_bots')) {
+    localStorage.setItem('vantis_bots', oldBots);
+  }
+  const oldSession = localStorage.getItem('clerk_session');
+  if (oldSession && !localStorage.getItem('vantis_token')) {
+    localStorage.setItem('vantis_token', oldSession);
+  }
+  ['botforge_bots', 'clerk_session', 'token', 'access_token', 'refresh_token'].forEach(k => localStorage.removeItem(k));
+})();
 
-// Nav update
 document.addEventListener('DOMContentLoaded', async () => {
   checkBackend().then(online => {
     if (!online && isAuthenticated() && !window.location.pathname.includes('login') && !window.location.pathname.includes('register')) {
@@ -267,22 +282,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (path === 'builder.html' && typeof initBuilder === 'function') initBuilder();
   if (path === 'dashboard.html' && typeof initDashboard === 'function') initDashboard();
 
-  // Update nav - remove Sign In link if user has local data
   const nav = document.querySelector('.nav-links');
-  if (nav && localStorage.getItem('botforge_bots')) {
-    const signOutLink = document.createElement('a');
-    signOutLink.href = '#';
-    signOutLink.textContent = 'Clear Local Data';
-    signOutLink.style.opacity = '0.6';
-    signOutLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (confirm('Clear all locally saved bots?')) {
-        localStorage.removeItem('botforge_bots');
-        window.location.reload();
-      }
-    });
-    if (!document.querySelector('.nav-links a[href="login.html"]') && !document.querySelector('.nav-links a[href="#"]')) {
-      nav.appendChild(signOutLink);
+  if (nav) {
+    const user = getCurrentUser();
+    if (user) {
+      const existingBtns = nav.querySelectorAll('.btn-signin, .btn-getstarted');
+      existingBtns.forEach(b => b.remove());
+
+      const userMenu = document.createElement('a');
+      userMenu.href = 'account-settings.html';
+      userMenu.textContent = user.username || user.email || 'Account';
+      userMenu.style.opacity = '0.8';
+      nav.appendChild(userMenu);
     }
   }
 });

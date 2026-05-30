@@ -145,6 +145,24 @@ async function init() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_backtest_trades_backtest_id ON backtest_trades(backtest_id);
+
+    CREATE TABLE IF NOT EXISTS oauth_accounts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      provider TEXT NOT NULL,
+      provider_id TEXT NOT NULL,
+      email TEXT,
+      name TEXT,
+      picture_url TEXT,
+      access_token TEXT,
+      refresh_token TEXT,
+      token_expires_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_oauth_provider_user ON oauth_accounts(provider, provider_id);
+    CREATE INDEX IF NOT EXISTS idx_oauth_user_id ON oauth_accounts(user_id);
   `);
 
   // Add columns to existing tables (safe for upgrades)
@@ -157,6 +175,9 @@ async function init() {
   addCol('users', 'failed_login_attempts INTEGER NOT NULL DEFAULT 0');
   addCol('users', 'locked_until DATETIME');
   addCol('users', 'clerk_id TEXT');
+  addCol('users', 'verification_token TEXT');
+  addCol('users', 'reset_token TEXT');
+  addCol('users', 'reset_token_expires DATETIME');
   addCol('bots', "status TEXT NOT NULL DEFAULT 'draft'");
 }
 

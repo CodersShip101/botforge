@@ -5,12 +5,11 @@ const request = require('supertest');
 
 const app = require('../server');
 
-// In offline mode, the bearer token value is used as the user identifier (clerk_id)
-let testToken = 'test_clerk_user_123';
+let testToken = null;
 let testBotId = null;
+const testEmail = `test-${Date.now()}@test.com`;
 
 beforeAll(async () => {
-  // Remove old DB file so updated schema (nullable password_hash) takes effect
   const dbPath = path.join(__dirname, '..', 'data', 'botforge.db');
   try { fs.unlinkSync(dbPath); } catch (e) {}
   try { fs.unlinkSync(dbPath + '-wal'); } catch (e) {}
@@ -33,14 +32,52 @@ afterAll(() => {
 });
 
 describe('Auth API', () => {
-  test('POST /api/auth/sync - syncs Clerk user', async () => {
+  test('POST /api/auth/register - creates account', async () => {
     const res = await request(app)
-      .post('/api/auth/sync')
-      .set('Authorization', `Bearer ${testToken}`)
-      .send({ userId: 'test_clerk_user_123', email: 'test-user@test.com', username: 'testuser' });
+      .post('/api/auth/register')
+      .send({ email: testEmail, username: 'testuser', password: 'testpass123' });
+    expect(res.status).toBe(201);
+    expect(res.body.user.email).toBe(testEmail);
+    expect(res.body.token).toBeDefined();
+    testToken = res.body.token;
+  });
+
+  test('POST /api/auth/register - rejects duplicate email', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ email: testEmail, username: 'testuser2', password: 'testpass123' });
+    expect(res.status).toBe(400);
+  });
+
+  test('POST /api/auth/login - logs in with valid credentials', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: testEmail, password: 'testpass123' });
     expect(res.status).toBe(200);
-    expect(res.body.email).toBe('test-user@test.com');
-    expect(res.body.plan).toBe('free');
+    expect(res.body.token).toBeDefined();
+    expect(res.body.user.email).toBe(testEmail);
+    testToken = res.body.token;
+  });
+
+  test('POST /api/auth/login - rejects wrong password', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: testEmail, password: 'wrongpass' });
+    expect(res.status).toBe(401);
+  });
+
+  test('GET /api/auth/me - returns current user', async () => {
+    const res = await request(app)
+      .get('/api/auth/me')
+      .set('Authorization', `Bearer ${testToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.user.email).toBe(testEmail);
+  });
+
+  test('GET /api/auth/me - rejects without auth', async () => {
+    const res = await request(app)
+      .get('/api/auth/me');
+    expect(res.status).toBe(401);
   });
 
   test('GET /api/auth/plan - returns plan', async () => {
